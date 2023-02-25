@@ -60,3 +60,6 @@ Please submit your PR against `develop` branch. This is where everything gets me
 
 MIT License. (c) 2012-2022 Itteco Software Corp. [Nazar Leush](https://github.com/nleush), [Ivan Paramonau](https://twitter.com/iparamonau) and the [contributors](https://github.com/itteco/iframely/graphs/contributors).
 
+
+# Google Cloud Run
+gcloud builds submit --substitutions=_TAG=latest,_PROJECT_ID=sharelo-347319
