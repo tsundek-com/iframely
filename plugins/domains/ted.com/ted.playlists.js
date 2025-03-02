@@ -11,9 +11,9 @@ export default {
         
         if (/\/playlists\//.test(og.url)) {
             return {
-                href: og.url.replace(/^https?:\/\/(www\.)?/i, "https://embed-ssl.").replace(/\?[^\/]+$/, ''),
+                href: og.url.replace(/^https?:\/\/(www\.)?/i, "https://embed.").replace(/\?[^\/]+$/, ''),
                 accept: CONFIG.T.text_html,
-                rel: [CONFIG.R.player, CONFIG.R.html5],
+                rel: CONFIG.R.player,
                 // defaault "aspect-ratio"
             }
         }

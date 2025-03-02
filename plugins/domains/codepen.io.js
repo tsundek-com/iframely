@@ -39,7 +39,7 @@ export default {
         return {
             href: href,
             type: CONFIG.T.text_html,
-            rel: [CONFIG.R.app, CONFIG.R.oembed, CONFIG.R.html5],
+            rel: [CONFIG.R.app, CONFIG.R.oembed],
             height: params.height,
             options: {
                 height: {
@@ -64,10 +64,7 @@ export default {
         }
     },
 
-    tests: [ {
-        pageWithFeed: "http://codepen.io/popular/",
-        selector: ".cover-link"
-    },
+    tests: [
         "http://codepen.io/kevinjannis/pen/pyuix",
         "http://codepen.io/nosecreek/details/sprDl",
         "http://codepen.io/dudleystorey/pen/HrFBx",

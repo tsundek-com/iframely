@@ -1,31 +1,32 @@
-import log from '../../../logging.js';
 import * as entities from 'entities';
 
 export default {
 
-    re: [/^https?:\/\/twitter\.com\/(?:\w+)\/status(?:es)?\/(\d+)/i],
+    re: [/^https?:\/\/(?:twitter|x)\.com\/(?:\w+)\/status(?:es)?\/(\d+)/i],
 
     provides: ['twitter_oembed', 'twitter_og', '__allowTwitterOg'],
 
     mixins: ['domain-icon'],
 
-    getData: function(urlMatch, request, options, cb) {
+    getData: function(urlMatch, request, log, options, cb) {
 
-        var c = options.getProviderOptions("twitter") || options.getProviderOptions("twitter.status");
+        var hide_media = options.getProviderOptions("twitter.hide_media");
+        var omit_script = options.getProviderOptions("twitter.omit_script");
 
-        if (c.disabled) {
+        if (options.getProviderOptions("twitter.disabled", false)) {
             return cb('Twitter API disabled');
         }
 
         request({
             url: "https://publish.twitter.com/oembed",
             qs: {
-                hide_media:  c.hide_media, 
-                hide_thread: true, //  c.hide_thread - now handled in getLinks. This is the only reliable way to detect if a tweet has the thread
-                omit_script: c.omit_script,
-                url: urlMatch[0]
+                hide_media:  hide_media, 
+                hide_thread: true, //  hide_thread - now handled in getLinks. This is the only reliable way to detect if a tweet has the thread
+                omit_script: omit_script,
+                url: urlMatch[0].replace('x.com', 'twitter.com')
             },
-            json: true,
+            // json: true,  // Causes issues on 404 when it's not in JSON format, we need result code here. 
+                            // When response is OK and is JSON, `fetchData` in fetch.js will see `application/json` and will convert to JSON on its own.
             cache_key: 'twitter:oembed:' + urlMatch[1],
             prepareResult: function(error, response, oembed, cb) {
 
@@ -57,15 +58,15 @@ export default {
                     return cb('Object expected in Twitter API (statuses/oembed.json), got: ' + oembed);
                 }
 
-                oembed.title = oembed.author_name + ' on Twitter';
-                oembed["min-width"] = c["min-width"];
-                oembed["max-width"] = c["max-width"];
+                oembed.title = oembed.author_name + ' on Twitter / X';
+                oembed["min-width"] = options.getProviderOptions("twitter.min-width");
+                oembed["max-width"] = options.getProviderOptions("twitter.max-width");
 
                 var result = {
                     twitter_oembed: oembed
                 };
 
-                if (/pic\.twitter\.com/i.test(oembed.html)) {
+                if (/pic\.(?:twitter|x)\.com/i.test(oembed.html) && options.getProviderOptions("twitter.thumbnail", false)) {
                     result.__allowTwitterOg = true;
                     options.followHTTPRedirect = true; // avoid core's re-directs. Use HTTP request redirects instead
                     options.exposeStatusCode = true;
@@ -94,9 +95,14 @@ export default {
         var html = twitter_oembed.html;
 
         // Apply config
+
         var locale = options.getProviderOptions('locale');
-        if (locale && /^\w{2}(?:\_|\-)\w{2,3}$/.test(locale)) {
-            html = html.replace(/<blockquote class="twitter\-tweet"( data\-lang="\w+(?:\_|\-)\w+")?/, '<blockquote class="twitter-tweet" data-lang="' + locale.replace('-', '_') + '"');
+        var locale_RE = /^\w{2,3}(?:(?:\_|\-)\w{2,3})?$/i;
+        if (locale && locale_RE.test(locale)) {
+            if (!/^zh\-/i.test(locale)) {
+                locale = locale.replace(/\-.+$/i, '');
+            }
+            html = html.replace(/<blockquote class="twitter\-tweet"( data\-lang="\w+(?:(?:\_|\-)\w+)?")?/, '<blockquote class="twitter-tweet" data-lang="' + locale + '"');
         }
         
         if (options.getProviderOptions('twitter.center', true) && !/\s?align=\"center\"/.test(html)) {
@@ -116,7 +122,7 @@ export default {
                         || /pic\.twitter\.com\//i.test(html) 
                         || twitter_og.image && (!!twitter_og.image.user_generated || !/\/profile_images\//i.test(twitter_og.image));
 
-        if (has_thread && (!options.getRequestOptions('twitter.hide_thread', true) || options.getProviderOptions(CONFIG.O.more, false) )) {
+        if (has_thread && !options.getRequestOptions('twitter.hide_thread', true)) {
             html = html.replace(/\s?data-conversation=\"none\"/i, '');
         }
 
@@ -161,7 +167,7 @@ export default {
             placeholder: '220-550, in px'
         };
         
-        var maxwidth =  parseInt(options.getRequestOptions('twitter.maxwidth', undefined));
+        var maxwidth = parseInt(options.getRequestOptions('maxwidth'));
         if (maxwidth && maxwidth >= 220 && maxwidth <= 550) {
             if (!/data\-width=\"/.test(html)) {
                 html = html.replace(
@@ -180,13 +186,12 @@ export default {
         var app = {
             html: html,
             type: CONFIG.T.text_html,
-            rel: [CONFIG.R.app, CONFIG.R.inline, CONFIG.R.ssl, CONFIG.R.html5],
+            rel: [CONFIG.R.app, CONFIG.R.inline, CONFIG.R.ssl],
             "max-width": opts.maxwidth.value || twitter_oembed["width"] || 550,
             options: opts
         };
 
-        if ((/https:\/\/t\.co\//i.test(twitter_oembed.html) && !/pic\.twitter\.com\//i.test(twitter_oembed.html)) // there's a link and a card inside the tweet
-            || (twitter_og.image && !(twitter_og.image.user_generated || /\/profile_images\//i.test(twitter_og.image)))) { // user_generated is string = 'true' for pics
+        if (/https:\/\/t\.co\//i.test(twitter_oembed.html) || /pic\.twitter\.com\//i.test(twitter_oembed.html)) {
             app['aspect-ratio'] = 1;
         }
 
@@ -214,6 +219,6 @@ export default {
 
     tests: [
         "https://twitter.com/Tackk/status/610432299486814208/video/1",
-        "https://twitter.com/RockoPeppe/status/582323285825736704?lang=en"  // og-image
+        "https://twitter.com/RockoPeppe/status/582323285825736704?lang=en"
     ]
 };

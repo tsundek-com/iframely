@@ -41,12 +41,11 @@ export default {
             }
 
 
-            // Twitter player is broken on GIFs: https://dribbble.com/shots/4240497-Wisdo-apps-video-introduction
             if (twitter.player && twitter.player.width && twitter.player.height) {
                 links.push({
                     href: twitter.player.value,
                     type: CONFIG.T.text_html,
-                    rel: [CONFIG.R.player, CONFIG.R.gifv, CONFIG.R.html5],
+                    rel: CONFIG.R.player,
                     'aspect-ratio': twitter.player.width / twitter.player.height,
                 })
             }

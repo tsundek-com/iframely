@@ -1,12 +1,12 @@
 export default {
 
-    re: /^https?:\/\/([a-zA-Z0-9]+).wistia\.com\/medias\/([_a-zA-Z0-9]+)/i,
+    re: /^https?:\/\/([a-zA-Z0-9\-]+).wistia\.com\/medias\/([_a-zA-Z0-9]+)/i,    
 
     mixins: [
         "oembed-site",
         "oembed-title",
         "oembed-thumbnail",
-        "oembed-duration",
+        "oembed-duration"
     ],
 
     getMeta: function(oembed) {
@@ -35,7 +35,7 @@ export default {
             return [{
                 href: "https://fast.wistia.net/embed/iframe/" + urlMatch[2] + params,
                 type: CONFIG.T.text_html,
-                rel: [CONFIG.R.player, CONFIG.R.html5],
+                rel: CONFIG.R.player,
                 "aspect-ratio": oembed.width / oembed.height,
                 autoplay: "autoPlay=true"
             }, icon];
@@ -44,7 +44,7 @@ export default {
             return [{
                 html: oembed.html,
                 type: CONFIG.T.text_html,
-                rel: [CONFIG.R.player, CONFIG.R.audio, CONFIG.R.html5, CONFIG.R.ssl, CONFIG.R.inline],
+                rel: [CONFIG.R.player, CONFIG.R.audio, CONFIG.R.ssl, CONFIG.R.inline],
                 height: 218
             }, icon];
 
@@ -67,7 +67,7 @@ export default {
         skipMethods: ["getMeta"]
     },
         "https://appsumo.wistia.com/medias/fudkgyoejs",
-        "https://shluchim.wistia.com/medias/l0mkqobjda",
+        "https://cirata.wistia.com/medias/9mnslih4pz",
         "https://signalophthalmic.wistia.com/medias/hfqfnxk3yb"
     ]
 };

@@ -37,13 +37,10 @@ export default {
             rels.push(CONFIG.R['3d']);
         }
 
-
         if (whitelistRecord.isAllowed('oembed.rich', "inline")) {
             rels.push(CONFIG.R.inline);
         }
-        if (whitelistRecord.isAllowed('oembed.rich', "html5")) {
-            rels.push(CONFIG.R.html5);
-        }
+
         rels.push ("allow"); // Otherwise, rich->players get denied by oembed:video whitelist record.
 
         var widget = {
@@ -78,7 +75,7 @@ export default {
 
         if (widget.html && whitelistRecord.isAllowed('oembed.rich', "ssl")) {
             // For pure HTML, the only way to detect SSL is to take it from Whitelist.
-            widget.rel.push (CONFIG.R.ssl);
+            widget.rel.push(CONFIG.R.ssl);
         }
 
         if (whitelistRecord.isAllowed('oembed.rich', 'responsive') && oembed.width && oembed.height) {
@@ -103,8 +100,17 @@ export default {
         }
 
         if (iframe && iframe.src && iframe.allow) {
-            widget.rel = widget.rel.concat(iframe.allow.replace(/autoplay;?\s?\*?/ig, '').split(/\s?\*?;\s?\*?/g));
-        }        
+            widget.rel = widget.rel.concat(iframe.allow.replace(/autoplay;?\s?\*?/ig, '').split(/\s?\*?(?:;|,)\s?\*?/g));
+        }
+
+        if (iframe && iframe.src && iframe.onmousewheel === '') {
+            widget.rel.push('nowheel');
+        }
+
+        if (widget.href && whitelistRecord.isAllowed('oembed.rich', "accept") && widget.type === CONFIG.T.text_html) {
+            widget.accept = widget.type;
+            delete widget.type;
+        }
 
         return widget;
     },

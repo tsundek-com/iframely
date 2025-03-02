@@ -1,8 +1,5 @@
 import cheerio from 'cheerio';
-
 import * as querystring from 'querystring';
-import * as _ from 'underscore';
-import log from '../../../logging.js'
 
 export default {
 
@@ -11,16 +8,18 @@ export default {
         /^https?:\/\/youtu.be\/([a-zA-Z0-9_-]+)/i,
         /^https?:\/\/m\.youtube\.com\/#\/watch\?(?:[^&]+&)*v=([a-zA-Z0-9_-]+)/i,
         /^https?:\/\/www\.youtube\.com\/embed\/([a-zA-Z0-9_-]+)/i,
+        /^https?:\/\/www\.youtube\.com\/live\/([a-zA-Z0-9_-]+)/i,
         /^https?:\/\/www\.youtube\.com\/v\/([a-zA-Z0-9_-]+)/i,
         /^https?:\/\/www\.youtube\.com\/user\/[a-zA-Z0-9_-]+\/?\?v=([a-zA-Z0-9_-]+)/i,
-        /^https?:\/\/www\.youtube-nocookie\.com\/(?:v|embed)\/([a-zA-Z0-9_-]+)/i
+        /^https?:\/\/www\.youtube-nocookie\.com\/(?:v|embed)\/([a-zA-Z0-9_-]+)/i,
+        /^https?:\/\/www\.youtube\.com\/shorts\/([a-zA-Z0-9_-]+)/i
     ],
 
     mixins: ["domain-icon"],
 
     provides: 'youtube_video_gdata',
 
-    getData: function(urlMatch, request, options, cb) {
+    getData: function(urlMatch, request, log, options, cb) {
 
         var api_key = options.getProviderOptions('youtube.api_key');
 
@@ -70,12 +69,11 @@ export default {
                     return cb(error);
                 }
 
-                if (data.items && data.items.length > 0) {
-
+                if (data?.items?.length > 0) {
                     var entry = data.items[0];
 
                     var duration = 0;
-                    var durationStr = entry.contentDetails && entry.contentDetails.duration;
+                    var durationStr = entry.contentDetails?.duration;
                     if (durationStr) {
                         var m = durationStr.match(/(\d+)S/);
                         if (m) {
@@ -93,22 +91,25 @@ export default {
 
                     var gdata = {
                         id: urlMatch[1],
-                        title: entry.snippet && entry.snippet.title,
-                        uploaded: entry.snippet && entry.snippet.publishedAt,
-                        uploader: entry.snippet && entry.snippet.channelTitle,
-                        channelId: entry.snippet && entry.snippet.channelId,
-                        description: entry.snippet && entry.snippet.description,
-                        likeCount: entry.statistics && entry.statistics.likeCount,
-                        dislikeCount: entry.statistics && entry.statistics.dislikeCount,
-                        viewCount: entry.statistics && entry.statistics.viewCount,
+                        title: entry.snippet?.title,
+                        uploaded: entry.snippet?.publishedAt,
+                        uploader: entry.snippet?.channelTitle,
+                        channelId: entry.snippet?.channelId,
+                        description: entry.snippet?.description,
+                        likeCount: entry.statistics?.likeCount,
+                        dislikeCount: entry.statistics?.dislikeCount,
+                        viewCount: entry.statistics?.viewCount,
 
-                        hd: entry.contentDetails && entry.contentDetails.definition === "hd",
-                        playerHtml: entry.player && entry.player.embedHtml,
+                        hd: entry.contentDetails?.definition === "hd",
+                        playerHtml: entry.player?.embedHtml,
                         embeddable: entry.status ? entry.status.embeddable : true,
-                        uploadStatus: entry.status && entry.status.uploadStatus
+                        uploadStatus: entry.status?.uploadStatus,
+                        status: entry.status,
+                        ytRating: entry.contentDetails?.contentRating?.ytRating,
+                        isShort: /\/shorts\//i.test(urlMatch[0])
                     };
 
-                    if (entry.snippet && entry.snippet.thumbnails) {
+                    if (entry.snippet?.thumbnails) {
                         gdata.thumbnails = entry.snippet.thumbnails;
                     }
 
@@ -119,7 +120,7 @@ export default {
                     if (gdata.uploadStatus === "rejected") {
                         cb({
                             responseStatusCode: 410,
-                            message: "The video has been removed. Reason: " + (entry.status && entry.status.rejectionReason || 'not given')
+                            message: "The video has been removed. Reason: " + (entry.status?.rejectionReason || 'not given')
                         });
                     } else {
                         cb(null, {
@@ -127,7 +128,7 @@ export default {
                         });
                     }
 
-                } else if (data.items && data.items.length == 0 || data.error && data.error.code == 404) {
+                } else if (data && data.items && data.items.length == 0 || data && data.error && data.error.code == 404) {
                     cb({responseStatusCode: 404});
                 } else {
                     log('YoutTube fallback for ' + urlMatch[1], data);
@@ -148,6 +149,7 @@ export default {
             likes: youtube_video_gdata.likeCount,
             dislikes: youtube_video_gdata.dislikeCount,
             views: youtube_video_gdata.viewCount,
+            warning: youtube_video_gdata.ytRating === 'ytAgeRestricted' ? 'age': null,
             site: "YouTube",
             canonical: "https://www.youtube.com/watch?v=" + youtube_video_gdata.id,
             author_url: "https://www.youtube.com/" + (youtube_video_gdata.channelId  ? "channel/" + youtube_video_gdata.channelId : "user/" + youtube_video_gdata.uploader)
@@ -164,8 +166,8 @@ export default {
             var start = url.match(/(?:t|start)=(\d+(?:m\d+)?(?:s)?m?)/i);
             var end = url.match(/(?:stop|end)=(\d+(?:m\d+)?(?:s)?m?)/i);
 
-            start = options.getRequestOptions('players.start', (start && start[1]) || '');
-            end = options.getRequestOptions('players.end', (end && end[1]) || '');
+            start = options.getRequestOptions('_start', (start && start[1]) || '');
+            end = options.getRequestOptions('_end', (end && end[1]) || '');
 
             var parseTime = function (t) {
                 if (typeof t === 'array') {
@@ -197,11 +199,6 @@ export default {
         } catch (ex) {/* and ignore */}
         // End of time extractions
 
-        if (options.getProviderOptions('players.playerjs', false) || options.getProviderOptions('players.autopause', false)) {
-            params.enablejsapi = 1;
-            params.playsinline = 1;
-        }
-
         if (options.getProviderOptions('locale', false)) {
             params.hl = options.getProviderOptions('locale', 'en-US').replace('_', '-');
         }
@@ -209,14 +206,49 @@ export default {
         // https://developers.google.com/youtube/player_parameters#cc_load_policy
         var cc_load_policy = options.getRequestOptions('youtube.cc_load_policy', params.cc_load_policy);
         if (cc_load_policy) {
-            params.cc_load_policy = '1';
+            params.cc_load_policy = 1;
         } else if (params.cc_load_policy) {
             delete params.cc_load_policy;
         }
 
+        // https://developers.google.com/youtube/player_parameters#controls
+        var controls = options.getRequestOptions('youtube.controls', params.controls);
+        if (controls == 0) {
+            params.controls = 0;
+        } else if (params.controls) {
+            delete params.controls;
+        }
+
+        // https://developers.google.com/youtube/player_parameters#loop
+        var loop = options.getRequestOptions('youtube.loop', params.loop);
+        if (loop) {
+            params.loop = 1;
+            // 'To loop a single video, set the loop parameter value to 1 and set the playlist parameter value to the same video ID'
+            if (!params.playlist) {
+                params.playlist = youtube_video_gdata.id;
+            }
+        } else if (params.loop) {
+            delete params.loop;
+        }        
+
+        // Support for direct links to YouTube clip embeds
+        if (/\/embed\/[^\?]+\?.*clip=.+clipt=.+/i.test(url)) {
+            var uri = url;
+            if (/&amp;/i.test(uri)) {
+                uri = url.replace(/&amp;/g, '&');
+            }
+
+            var query = querystring.parse(uri.match(/\?(.+)$/)[1]);
+
+            if (query.clip && query.clipt) {
+                params.clip = query.clip;
+                params.clipt = query.clipt;
+            }
+        }
+
         // Detect widescreen videos. YouTube API used to have issues with returing proper aspect-ratio.
         var widescreen = youtube_video_gdata.hd || (youtube_video_gdata.thumbnails && youtube_video_gdata.thumbnails.maxres != null);
-        var rels = [CONFIG.R.player, CONFIG.R.html5];
+        var rels = [CONFIG.R.player];
 
         if (youtube_video_gdata.playerHtml) { // maybe still widescreen. plus detect 'allow' from html
             var $container = cheerio('<div>');
@@ -227,7 +259,7 @@ export default {
             var $iframe = $container.find('iframe');
 
             if (!widescreen && $iframe.length == 1 && $iframe.attr('width') && $iframe.attr('height') && $iframe.attr('height') > 0) {
-                widescreen =  $iframe.attr('width') /  $iframe.attr('height') > 1.35;
+                widescreen =  $iframe.attr('width') / $iframe.attr('height') > 1.35;
             }
             if ($iframe.attr('allow')) {
                 rels = rels.concat($iframe.attr('allow').replace(/autoplay;?\s?/ig, '').split(/\s?;\s?/g));
@@ -236,9 +268,9 @@ export default {
         // End of widescreen & allow check
 
         var links = [];
-        var aspect = widescreen ? 16 / 9 : 4 / 3;
+        var aspect = youtube_video_gdata.isShort ? 9 / 16 : (widescreen ? 16 / 9 : 4 / 3);
 
-        if (youtube_video_gdata.embeddable) {
+        if (youtube_video_gdata.embeddable && youtube_video_gdata.ytRating !== 'ytAgeRestricted') {
 
             var qs = querystring.stringify(params);
             if (qs !== '') {qs = '?' + qs}
@@ -268,6 +300,8 @@ export default {
                     }
                 }
             }); 
+        } else if (youtube_video_gdata.ytRating === 'ytAgeRestricted') {
+            links.push({message: "This video is age-restricted and only available on YouTube"});
         } else {
             links.push({message: (youtube_video_gdata.uploader || "Uploader of this video") +  " disabled embedding on other sites."});
         }
@@ -285,7 +319,7 @@ export default {
                     width: youtube_video_gdata.thumbnails[def].width, 
                     height: youtube_video_gdata.thumbnails[def].height
                 });
-            }            
+            }
         });
 
         // But allow bigger image (with black stripes, sigh) for HD w/o maxresdefault to avoid 'tiny-only' thumbnail
@@ -306,8 +340,9 @@ export default {
     tests: [{
         noFeeds: true
     },
-        "http://www.youtube.com/watch?v=etDRmrB9Css",
-        "http://www.youtube.com/embed/Q_uaI28LGJk"
+        "http://www.youtube.com/watch?v=etDRmrB9Css", // 4:3
+        "https://www.youtube.com/embed/mDFBTdToRmw?rel=0",
+        "https://www.youtube.com/embed/yJpJ8REjvqo?si=-2PKj71d6RhnnCFU&amp;clip=UgkxvYwD1omSQWCDuoWYo6hHJjQzcLGbJqYi&amp;clipt=EPjgJhjg4ig" // sic! with &amp; - as the code is manually copied from YouTube
         // embeds disabled - https://www.youtube.com/watch?v=e58FeKOgsU8
     ]
 };

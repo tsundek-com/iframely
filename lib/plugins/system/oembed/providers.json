@@ -3,11 +3,12 @@
         "name": "Facebook Post no query string",
         "templates": [
           "(?:www|m|business)\\.(facebook\\.com/[a-zA-Z0-9\\.\\-]+/(?:posts|activity)/\\d{10,})",
+          "(?:www|m|business)\\.(facebook\\.com/[a-zA-Z0-9\\.\\-]+/(?:posts|activity)/pfbid([a-zA-Z0-9\\.\\-]+))",
           "(?:www|m|business)\\.(facebook\\.com/notes/[^/]+/[^/]+/\\d{10,})",
           "(?:www|m|business)\\.(facebook\\.com/\\d+_\\d+)"
         ],
         "url": "https://www.{1}",
-        "endpoint": "https://graph.facebook.com/v11.0/oembed_post"
+        "endpoint": "https://graph.facebook.com/v18.0/oembed_post"
     },
     {
         "name": "Facebook Video no query string",
@@ -16,20 +17,21 @@
             "(?:www|m|business)\\.(facebook\\.com/watch/?\\?v=\\d+)"
         ],
         "url": "https://www.{1}",
-        "endpoint": "https://graph.facebook.com/v11.0/oembed_video"
+        "endpoint": "https://graph.facebook.com/v18.0/oembed_video"
     },
     {
         "name": "Facebook Video",
-        "templates": [          
-          "(?:www|business)\\.facebook\\.com/video/video\\.php.*[\\?&]v=(\\d{5,})(?:$|&)",          
+        "templates": [
+          "(?:www|business)\\.facebook\\.com/video/video\\.php.*[\\?&]v=(\\d{5,})(?:$|&)",
           "(?:www|business)\\.facebook\\.com/video/video\\.php\\?v=(\\d{5,})",
           "(?:www|business)\\.facebook\\.com/video\\.php.*[\\?&]v=(\\d{5,})(?:$|&)",
           "(?:www|business)\\.facebook\\.com/video\\.php.*[\\?&]id=(\\d{5,})(?:$|&)",
           "(?:www|m|business)\\.facebook\\.com/photo\\.php\\.*[\\?&]v=(\\d{5,})",
           "(?:www|business)\\.facebook\\.com/[a-zA-Z0-9.]+/videos/.+",
-          "(?:www|m|business)\\.(facebook\\.com/watch/?\\?(?:.+&)?v=\\d+)"
+          "(?:www|m|business)\\.facebook\\.com/watch/?\\?(?:.+&)?v=\\d+",
+          "(?:www|m|business)\\.facebook\\.com/reel/\\d+"          
         ],
-        "endpoint": "https://graph.facebook.com/v11.0/oembed_video"
+        "endpoint": "https://graph.facebook.com/v18.0/oembed_video"
     },
     {
         "name": "Facebook Post",
@@ -37,18 +39,18 @@
           "(?:www|m|business)\\.facebook\\.com/(permalink|story)\\.php\\?[^/]+(\\d{10,})",
           "(?:www|m|business)\\.facebook\\.com/photo\\.php\\?[^/]+(\\d{10,})",
           "(?:www|m|business)\\.facebook\\.com/photo/?\\?",
-          "(?:www|m|business)\\.facebook\\.com/([a-zA-Z0-9\\.\\-]+)/photos/[^\\/]+/(\\d{10,})",
+          "(?:www|m|business)\\.facebook\\.com/([a-zA-Z0-9\\.\\-]+)/(?:photos/)?[^\\/]+/(\\d{10,})",
           "(?:www|m|business)\\.facebook\\.com/media/set/\\?set=[^/]+(\\d{10,})"
         ],
-        "endpoint": "https://graph.facebook.com/v11.0/oembed_post"
-    },    
+        "endpoint": "https://graph.facebook.com/v18.0/oembed_post"
+    },
     {
         "name": "Facebook Page",
         "templates": [
             "(?:www|m)\\.facebook\\.com/(?:pg|pages)/",
             "(?:www|m)\\.facebook\\.com/[^/]+/?(?:about|photos|videos|events|timeline|photos_stream)?/?(?:\\?[^/\\?]+)?$"
         ],
-        "endpoint": "https://graph.facebook.com/v11.0/oembed_page"
+        "endpoint": "https://graph.facebook.com/v18.0/oembed_page"
     },
     {
         "name": "Instagram",
@@ -56,15 +58,23 @@
             "(?:www\\.)?(instagram\\.com/(?:p|tv|reel)/([a-zA-Z0-9_-]+))",
             "(instagr\\.am/p/([a-zA-Z0-9_-]+))"
         ],
-        "endpoint": "https://graph.facebook.com/v11.0/instagram_oembed?format={format}&url=https://www.{1}/"
+        "endpoint": "https://graph.facebook.com/v18.0/instagram_oembed?format={format}&url=https://www.{1}/"
     },
     {
         "name": "Instagram user page",
         "templates": [
-            "(?:www\\.)?(instagram\\.com/)[a-zA-Z0-9_\\-\\.]+/(p/[a-zA-Z0-9_-]+)",
+            "(?:www\\.)?(instagram\\.com/)[a-zA-Z0-9_\\-\\.]+/((?:p|tv|reel)/[a-zA-Z0-9_-]+)",
             "(instagr\\.am/)[a-zA-Z0-9_\\-\\.]+/(p/[a-zA-Z0-9_-]+)"
         ],
-        "endpoint": "https://graph.facebook.com/v11.0/instagram_oembed?format={format}&url=https://www.{1}{2}"
+        "endpoint": "https://graph.facebook.com/v18.0/instagram_oembed?format={format}&url=https://www.{1}{2}"
+    },
+    {
+        "name": "Instagram profile",
+        "templates": [
+            "(?:www\\.)?(instagram\\.com/)([a-zA-Z0-9_\\-\\.]+)/?(?:\\?.+)?$"
+        ],
+        "url": "https://www.{1}{2}/",
+        "endpoint": "https://graph.facebook.com/v18.0/instagram_oembed?format={format}&&url={url}"
     },
     {
         "name": "Dailymotion",
@@ -85,7 +95,7 @@
     {
         "name": "Giphy",
         "templates": [
-            "giphy\\.com/gifs/[a-zA-Z0-9_-]+\\-([a-zA-Z0-9]+)(?:\\?.+)?"
+            "giphy\\.com/(?:gifs|stickers)/[a-zA-Z0-9_-]+\\-([a-zA-Z0-9]+)(?:\\?.+)?"
         ],
         "url": "https://media.giphy.com/media/{1}/giphy.gif",
         "endpoint": "https://giphy.com/services/oembed"
@@ -96,7 +106,7 @@
             "giphy\\.com/(?:videos|clips)/(?:[a-zA-Z0-9_-]+\\-)?([a-zA-Z0-9]+)(?:\\?.+)?"
         ],
         "endpoint": "https://giphy.com/services/oembed"
-    },    
+    },
     {
         "name": "Flickr",
         "templates": [
@@ -112,7 +122,7 @@
         "templates": [
             "players.brightcove.net/.*"
         ],
-        "endpoint": "https://oembed.brightcove.com/"        
+        "endpoint": "https://oembed.brightcove.com/"
     },
     {
         "name": "Hulu",
@@ -159,6 +169,13 @@
         "endpoint": "https://www.youtube.com/oembed?format={format}&url={url}"
     },
     {
+        "name": "YouTube Shorts",
+        "templates": [
+            "www\\.youtube\\.com/shorts/([a-zA-Z0-9_-]+)"
+        ],
+        "endpoint": "https://www.youtube.com/oembed"
+    },    
+    {
         "name": "YouTube Playlist",
         "templates": [
             "www\\.youtube\\.com/playlist"
@@ -182,7 +199,7 @@
     {
         "name": "SlideShare",
         "templates": [
-            "\\w+\\.slideshare\\.net/.+/.*"
+            "\\w+\\.slideshare\\.net/(?!slideshow).+/.*"
         ],
         "endpoint": "https://www.slideshare.net/api/oembed/2"
     },
@@ -192,45 +209,62 @@
             ".*\\.wordpress.com",
             "wp\\.me/.*"
         ],
-        "endpoint": "https://public-api.wordpress.com/oembed/?format={format}&for=iframely&url={url}"        
+        "endpoint": "https://public-api.wordpress.com/oembed/?format={format}&for=iframely&url={url}"
     },
     {
         "name": "Twitter Moments",
         "templates": [
-            "twitter\\.com/i/moments/(\\d+)"
+            "(?:twitter|x)\\.com/i/moments/(\\d+)"
         ],
         "endpoint": "https://publish.twitter.com/oembed?i=moment&url={url}"
     },
     {
         "name": "Twitter Timelines",
         "templates": [
-            "twitter\\.com/(\\w+)/timelines/(\\d+)",
-            "twitter\\.com/(\\w+)/lists/(\\w+)",
-            "twitter\\.com/(\\w+)/likes"
+            "(?:twitter|x)\\.com/(\\w+)/timelines/(\\d+)",
+            "(?:twitter|x)\\.com/(\\w+)/lists/(\\w+)",
+            "\\.com/(\\w+)/likes"
         ],
         "endpoint": "https://publish.twitter.com/oembed?i=timeline&url={url}"
     },
     {
         "name": "Twitter Users",
         "templates": [
-            "(twitter\\.com/\\w+)/?(?:\\?.*)?$$"
+            "((?:twitter|x)\\.com/\\w+)/?(?:\\?.*)?$$"
         ],
         "endpoint": "https://publish.twitter.com/oembed?i=user&url=https://{1}"
     },
     {
         "name": "Twitter Statuses",
         "templates": [
-            "twitter\\.com/\\w+/status(?:es)?/\\d+"
+            "(?:twitter|x)\\.com/\\w+/status(?:es)?/\\d+"
         ],
         "endpoint": "https://publish.twitter.com/oembed"
+    },
+    {
+        "name": "TikTok photomode",
+        "templates": [
+            "www\\.tiktok\\.com/(@[^\\/]+)\/photo\/(\\d+)"
+        ],
+        "url": "https://www.tiktok.com/{1}/video/{2}",
+        "endpoint": "https://www.tiktok.com/oembed"
     },
     {
         "name": "TikTok",
         "templates": [
             "(?:www|t)?\\.tiktok\\.com/@[^\\/]+\/video\/\\d+",
             "(?:www|t)?\\.tiktok\\.com/(?:i18n\/)?share\/video\/\\d+",
-            "m\\.tiktok\\.com/v/\\d+"
+            "m\\.tiktok\\.com/v/\\d+",
+            "tiktok.com\/@.*"
         ],
+        "endpoint": "https://www.tiktok.com/oembed"
+    },
+    {
+        "name": "TikTok US",
+        "templates": [
+            "\\w{2}\\.(tiktok\\.com/@[^\\/]+\/video\/\\d+)"
+        ],
+        "url": "https://www.{1}",
         "endpoint": "https://www.tiktok.com/oembed"
     },
     {
@@ -240,13 +274,6 @@
             "(?:listen\\.|www\\.)?tidal\\.com\/(?:browse\/)?(\\w+)\/([a-zA-Z0-9\\-]+)"
         ],
         "endpoint": "https://oembed.tidal.com/"
-    },
-    {
-        "name": "GfyCat",
-        "templates": [
-            "gfycat\\.com/.+"
-        ],
-        "endpoint": "https://api.gfycat.com/v1/oembed?url={url}"
     },
     {
         "name": "dotSUB",
@@ -283,7 +310,7 @@
             "music\\.yandex\\.ru/album/(\\d+)/track/(\\d+)"
         ],
         "endpoint": "https://music.yandex.ru/handlers/oembed-{format}.jsx?album={1}&track={2}"
-    },    
+    },
     {
         "name": "Yandex Music",
         "templates": [
@@ -297,7 +324,7 @@
             "music\\.yandex\\.ru/album/(\\d+)"
         ],
         "endpoint": "https://music.yandex.ru/handlers/oembed-{format}.jsx?album={1}"
-    },   
+    },
     {
         "name": "Mixcloud",
         "templates": [
@@ -319,7 +346,8 @@
     {
         "name": "Wistia",
         "templates": [
-            ".*\\.wistia.com/medias/.*"
+            ".*\\.wistia.com/medias/.*",
+            "fast.wistia.net/embed/iframe/.*"
         ],
         "endpoint": "http://fast.wistia.com/oembed.{format}"
     },
@@ -339,8 +367,8 @@
             "polleverywhere\\.com/.*",
             "pollev\\.com/.*"
         ],
-        "endpoint": "https://www.polleverywhere.com/services/oembed.{format}"        
-    },    
+        "endpoint": "https://www.polleverywhere.com/services/oembed.{format}"
+    },
     {
         "name": "Meetup",
         "templates": [
@@ -355,7 +383,7 @@
             ".*\\.deviantart\\.com/gallery/.*"
         ],
         "endpoint": "https://backend.deviantart.com/oembed"
-    },    
+    },
     {
         "name": "Behance",
         "templates": [
@@ -374,7 +402,8 @@
     {
         "name": "Spotify",
         "templates": [
-            "(?:open|embed|play)\\.spotify\\.com/(?:embed/)?([^\\?]*)\\??.*"
+            "(?:open|embed|play)\\.spotify\\.com/(?:embed/)?([^\\?]*)\\??.*",
+            "spotify\\.link/.*"
         ],
         "url": "https://open.spotify.com/{1}",
         "endpoint": "https://open.spotify.com/oembed?url={url}&format={format}"
@@ -433,8 +462,7 @@
     {
         "name": "Reddit",
         "templates": [
-            "(?:www\\.|m\\.|new\\.)?reddit\\.com/r/([^\/]+)/comments/([a-zA-Z0-9]+)/([a-zA-Z0-9_]+)/([a-zA-Z0-9]+)",
-            "(?:www\\.|m\\.|new\\.)?reddit\\.com/r/([^\/]+)/comments/([a-zA-Z0-9]+)/([a-zA-Z0-9_]+)/?"            
+            "(?:www\\.|m\\.|new\\.)?reddit\\.com/r/([^\/]+)"
         ],
         "endpoint": "https://www.reddit.com/oembed"
     },
@@ -450,7 +478,7 @@
         "name": "RTL XL",
         "templates": [
             "rtlxl\\.nl/?(?:\\?.+)?#!/?.+",
-            "rtlxl\\.nl/programma/",            
+            "rtlxl\\.nl/programma/",
             "rtl\\.nl/video/([a-zA-Z0-9-]+)"
         ],
         "endpoint": "http://xlapi.rtl.nl/version=1/fun=oembed"
@@ -477,7 +505,7 @@
             "art19\\.com/shows/([a-zA-Z0-9\\-_]+)/embed"
         ],
         "endpoint": "https://art19.com/oembed.json?url=https://art19.com/shows/{1}"
-    },    
+    },
     {
         "name": "Graphiq",
         "templates": [
@@ -488,7 +516,7 @@
     {
         "name": "Slidely",
         "templates": [
-            "slide\\.ly\/(?:\\w+\/)?view\/\\w+"            
+            "slide\\.ly\/(?:\\w+\/)?view\/\\w+"
         ],
         "endpoint": "http://slide.ly/oembed"
     },
@@ -500,49 +528,50 @@
         "endpoint": "http://embed.gettyimages.com/oembed"
     },
     {
-        "name": "ReverbNation",        
+        "name": "ReverbNation",
         "templates": [
             "reverbnation.com"
         ],
         "endpoint": "https://www.reverbnation.com/oembed"
     },
     {
-        "name": "CNEvids",        
-        "templates": [        
+        "name": "CNEvids",
+        "templates": [
             "player(?:\\-backend)?\\.cnevids\\.com/embed/[0-9a-zA-Z]+/[0-9a-zA-Z]+",
-            "player(?:\\-backend)?\\.cnevids\\.com/iframe/video/[0-9a-zA-Z]+"            
+            "player(?:\\-backend)?\\.cnevids\\.com/iframe/video/[0-9a-zA-Z]+"
         ],
         "endpoint": "https://player.cnevids.com/services/oembed"
     },
     {
         "name": "Web TV",
-        "templates": [        
-            "\\w+.web\\.tv/video/"            
+        "templates": [
+            "\\w+.web\\.tv/video/"
         ],
-        "endpoint": "http://web.tv/api/generalapi/oembed"        
+        "endpoint": "http://web.tv/api/generalapi/oembed"
     }, {
         "name": "Kickstarter",
-        "templates": [        
+        "templates": [
             "kickstarter.com/projects/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+\\/?(?:\\?.*)?$"
         ],
         "endpoint": "https://www.kickstarter.com/services/oembed"
     }, {
         "name": "ProductHunt",
         "templates": [
-            "(?:www\\.)producthunt\\.com/posts/"
+            "(?:www\\.)producthunt\\.com/(?:posts|products)/([^/#]+)"
         ],
-        "endpoint": "https://api.producthunt.com/widgets/oembed"
+        "endpoint": "https://api.producthunt.com/widgets/oembed",
+        "url": "https://producthunt.com/posts/{1}"
     }, {
         "name": "ProductHunt Comments",
         "templates": [
-            "(?:www\\.)producthunt\\.com/posts/[^#]+#comments?\\-(\\d+)"
+            "(?:www\\.)producthunt\\.com/(?:posts|products)/[^#]+#comments?\\-(\\d+)"
         ],
         "url": "https://www.producthunt.com/comments/{1}",
         "endpoint": "https://api.producthunt.com/widgets/oembed?url={url}"
     }, {
         "name": "Office Forms",
-        "templates": [        
-            "forms.office.com/.*"            
+        "templates": [
+            "forms.office.com/.*"
         ],
         "endpoint": "https://forms.office.com/formapi/api/embed"
     }, {
@@ -553,17 +582,17 @@
         "endpoint": "https://tapewrite.com/REST/oembed"
     }, {
         "name": "someecards",
-        "templates": [            
+        "templates": [
             "someecards.com/usercards/viewcard/.*",
             "someecards.com/\\w+\\-cards/.*"
         ],
         "endpoint": "https://www.someecards.com/v2/oembed"
     }, {
         "name": "Datawrapper",
-        "templates": [            
+        "templates": [
             "datawrapper.dwcdn.net/.*"
         ],
-        "endpoint": "https://app.datawrapper.de/api/plugin/oembed"
+        "endpoint": "https://api.datawrapper.de/v3/oembed"
     }, {
         "name": "Tableau Public",
         "templates": [
@@ -586,19 +615,19 @@
         "endpoint": "https://overflow.io/services/oembed"
     }, {
         "name": "Storied",
-        "templates": [        
+        "templates": [
             "(\\w+.storied\\.co/.*/)"
         ],
         "endpoint": "https://{1}oembed.json?format={format}"
     }, {
         "name": "Figma",
-        "templates": [        
-            "(?:[\\w\\.-]+\\.)?figma.com/(file|proto)/.*"
+        "templates": [
+            "(?:[\\w\\.-]+\\.)?figma.com/(board|slides|deck|design|proto|file)/.*"
         ],
         "endpoint": "https://www.figma.com/api/oembed"
     }, {
         "name": "Archilogic",
-        "templates": [        
+        "templates": [
             "viewer.archilogic.com/.*",
             "editor.archilogic.com/.*"
         ],
@@ -614,7 +643,7 @@
         "templates": [
             ".*\\.podigee.io/.*"
         ],
-        "endpoint": "https://embed.podigee.com/oembed?type=iframe&url={url}"
+        "endpoint": "https://embed.podigee.com/oembed?url={url}"
     }, {
         "name": "Podbean",
         "templates": [
@@ -666,7 +695,7 @@
         "templates": [
             "(?:www\\.)?canva.com/design/"
         ],
-        "endpoint": "https://www.canva.com/_oembed"
+        "endpoint": "https://api.canva.com/_spi/presentation/_oembed"
     },
     {
         "name": "Microsoft Streams",
@@ -688,13 +717,6 @@
             "play.adpaths.com/experience/.*"
         ],
         "endpoint": "https://play.adpaths.com/oembed"
-    },
-    {
-        "name": "Avocode",
-        "templates": [
-            "app.avocode.com/view/.*"
-        ],
-        "endpoint": "https://stage-embed.avocode.com/api/oembed"
     },
     {
         "name": "DTube",
@@ -813,29 +835,337 @@
     {
         "name": "Opinary",
         "templates": [
-            "compass.pressekompass.net/*" 
+            "compass.pressekompass.net/*",
+            "compass.opinary.com/*"
         ],
         "endpoint": "https://api.opinary.com/oembed"
     },
     {
         "name": "GRID",
         "templates": [
-            "grid.is/.+/.+" 
+            "grid.is/.+/.+"
         ],
         "endpoint": "https://grid.is/api/oembed"
     },
     {
         "name": "Anchor FM",
         "templates": [
-            "anchor.fm/[a-zA-Z0-9\\-]+/episodes/[^\\/]+\\-([a-zA-Z0-9]+)(?:$|\\?)" 
+            "anchor.fm/[a-zA-Z0-9\\-]+/episodes/[^\\/]+\\-([a-zA-Z0-9]+)(?:$|\\?)"
         ],
         "endpoint": "https://anchor.fm/api/v3/episodes/{1}/oembed?format={format}"
     },
     {
         "name": "Videoask",
         "templates": [
-            "videoask.com/*"             
+            "videoask.com/*"
         ],
         "endpoint": "https://www.videoask.com/oembed"
+    },
+    {
+        "name": "Zoho Docs",
+        "templates": [
+            "docs.zoho(?:public)?.com/*"
+        ],
+        "endpoint": "https://docs.zoho.com/services/oembed"
+    },
+    {
+        "name": "ShiftX",
+        "templates": [
+            "shiftx.com/processes/.+/view",
+            "shiftx.com/processes/.+/public/.+"
+        ],
+        "endpoint": "https://shiftx.com/oembed"
+    },
+    {
+        "name": "Omny.fm",
+        "templates": [
+            "omny.fm/shows/*"
+        ],
+        "endpoint": "https://omny.fm/oembed"
+    },
+    {
+        "name": "Metacdn",
+        "templates": [
+            "metacdn.com/r/*"
+        ],
+        "endpoint": "https://www.metacdn.com/api/oembed?url={url}&format={format}"
+    },
+    {
+        "name": "iorad",
+        "templates": [
+            "iorad.com/player/*"
+        ],
+        "endpoint": "https://www.iorad.com/api/oembed"
+    }, {
+        "name": "Dropbox Capture",
+        "templates": [
+            "capture.dropbox.com/*"
+        ],
+        "endpoint": "https://www.dropbox.com/capture/oembed?format={format}&url={url}"
+    }, {
+        "name": "Miro",
+        "templates": [
+            "miro.com/app/board/*"
+        ],
+        "endpoint": "https://miro.com/api/v1/oembed?format={format}&url={url}"
+    }, {
+        "name": "Paperform",
+        "templates": [
+            ".*\\.paperform\\.co/.*"
+        ],
+        "endpoint": "https://paperform.co/services/oembed?url={url}"
+    }, {
+        "name": "Airtable",
+        "templates": [
+            "airtable\\.com/*/*"
+        ],
+        "endpoint": "https://airtable.com/integration/oembed"
+    },
+    {
+        "name": "Pinterest pins",
+        "templates": [
+            "(?:\\w{2,3}\\.)?pinterest(?:\\.com?)?\\.\\w{2,3}/pin/(?:[^\\/]+\\-)?(\\d+)"
+        ],
+        "url": "https://www.pinterest.com/pin/{1}",
+        "endpoint": "https://www.pinterest.com/oembed.json?url={url}&ref=iframely"
+    },
+    {
+        "name": "Pinterest boards and users",
+        "templates": [
+            "(?:\\w{2,3}\\.)?pinterest(?:\\.com?)?\\.\\w{2,3}\\/((?!pin)[a-zA-Z0-9%_\\-\\+]+|pinterest)\\/([a-zA-Z0-9%\\-\\+]+)\\/?(?:$|\\?|#)",
+            "(?:\\w{2,3}\\.)?pinterest(?:\\.com?)?\\.\\w{2,3}\\/((?!pin)[a-zA-Z0-9%_\\-\\+]+|pinterest)\\/?(?:$|\\?|#)"
+        ],
+        "endpoint": "https://www.pinterest.com/oembed.json?url={url}&ref=iframely"
+    },
+    {
+        "name": "Mightycause",
+        "templates": [
+            "mightycause.com/story/*"
+        ],
+        "endpoint": "https://www.mightycause.com/1/oembed"
+    },
+    {
+        "name": "Kooapp",
+        "templates": [
+            "kooapp.com/koo/.*"
+        ],
+        "endpoint": "https://embed.kooapp.com/services/oembed"
+    },
+    {
+        "name": "Observable",
+        "templates": [
+            "observablehq.com/@*/*",
+            "observablehq.com/d/*",
+            "observablehq.com/embed/*"
+        ],
+        "endpoint": "https://api.observablehq.com/oembed"
+    },
+    {
+        "name": "Commaful",
+        "templates": [
+            "commaful.com/play/*"
+        ],
+        "endpoint": "https://commaful.com/api/oembed/"
+    },
+    {
+        "name": "Cueup DJ Booking",
+        "templates": [
+            "cueup.io/user/*/sounds/*"
+        ],
+        "endpoint": "https://gql.cueup.io/oembed"
+    },
+    {
+        "name": "Fader",
+        "templates": [
+            "app.getfader.com/projects/*"
+        ],
+        "endpoint": "https://app.getfader.com/api/oembed"
+    },
+    {
+        "name": "Gong",
+        "templates": [
+            "app.gong.io/call",
+            ".*\\.app\\.gong\\.io/call"
+        ],
+        "endpoint": "https://app.gong.io/oembed"
+    },
+    {
+        "name": "HASH",
+        "templates": [
+            "core.hash.ai/@*"
+        ],
+        "endpoint": "https://api.hash.ai/oembed"
+    },
+    {
+        "name": "Idomoo",
+        "templates": [
+            ".*\\.idomoo\\.com/.*"
+        ],
+        "endpoint": "https://oembed.idomoo.com/oembed"
+    },
+    {
+        "name": "Indaco",
+        "templates": [
+            "player.indacolive.com/player/.*"
+        ],
+        "endpoint": "https://player.indacolive.com/services/oembed"
+    },
+    {
+        "name": "Portfolium",
+        "templates": [
+            "portfolium.com/entry/*"
+        ],
+        "endpoint": "https://api.portfolium.com/oembed"
+    },
+    {
+        "name": "SocialExplorer",
+        "templates": [
+            "socialexplorer.com/*"
+        ],
+        "endpoint": "https://www.socialexplorer.com/services/oembed/"
+    },
+    {
+        "name": "Trinity Audio",
+        "templates": [
+            "trinitymedia.ai/player/*"
+        ],
+        "endpoint": "https://trinitymedia.ai/services/oembed"
+    },
+    {
+        "name": "tvcf",
+        "templates": [
+            "play.tvcf.co.kr/*",
+            "tvcf.co.kr/*"
+        ],
+        "endpoint": "https://play.tvcf.co.kr/rest/oembed"
+    },
+    {
+        "name": "wecandeo",
+        "templates": [
+            "play.wecandeo.com/video/v/*"
+        ],
+        "endpoint": "https://play.wecandeo.com/oembed/"
+    },
+    {
+        "name": "wizer.me",
+        "templates": [
+            "[a-z0-9-]+.wizer.me/learn/*"
+        ],
+        "endpoint": "https://app.wizer.me/api/oembed.{format}"
+    },
+    {
+        "name": "Casual.app",
+        "templates": [
+            "my.causal.app/models/*"
+        ],
+        "endpoint": "https://my.causal.app/api/oembed"
+    },
+    {
+        "name": "fwdeveryone",
+        "templates": [
+            "fwdeveryone.com/t/*"
+        ],
+        "endpoint": "https://api.fwdeveryone.com/oembed"
+    },
+    {
+        "name": "Redivis",
+        "templates": [
+            "redivis.com/datasets/*"
+        ],
+        "endpoint": "https://redivis.com/services/oembed"
+    },
+    {
+        "name": "Flippingbook",
+        "templates": [
+            "online.flippingbook.com/view/*",
+            "online.flippingbook.com/view/*/*"
+        ],
+        "endpoint": "https://online.flippingbook.com/oembed"
+    },
+    {
+        "name": "Apester",
+        "templates": [
+            "(?:renderer|preview).apester.com/(?:interaction|v\\d+|media)/([a-z0-9]+)"
+        ],
+        "endpoint": "https://display.apester.com/oembed/",
+        "url": "https://renderer.apester.com/v2/{1}"
+    },
+    {
+        "name": "Bitchute",
+        "templates": [
+            "bitchute.com/video/*"
+        ],
+        "endpoint": "https://api.bitchute.com/oembed/"
+    },
+    {
+        "name": "Nebula",
+        "templates": [
+            "nebula.tv/videos/*"
+        ],
+        "endpoint": "https://nebula.tv/api/oembed"
+    },
+    {
+        "name": "Insight Timer",
+        "templates": [
+            "insighttimer.com/*"
+        ],
+        "endpoint": "https://widgets.insighttimer.com/services/oembed"
+    },
+    {
+        "name": "Hopvue",
+        "templates": [
+            "(?:www|portal\\.)?hopvue.com/*"
+        ],
+        "endpoint": "https://portal.hopvue.com/api/oembed/"
+    },
+    {
+        "name": "Tonic Audio",
+        "templates": [
+            "tnic.io/take/*",
+            "tnic.io/song/*",
+            "tonicaudio.com/song/*",
+            "tonicaudio.com/take/*"
+        ],
+        "endpoint": "https://tonicaudio.com/oembed"
+    },
+    {
+        "name": "Piggy",
+        "templates": [
+            "piggy.to/@*/*",
+            "piggy.to/view/*"
+        ],
+        "endpoint": "https://piggy.to/oembed"
+    },   
+    {
+        "name": "NDLA",
+        "templates": [
+            "ndla.no/*"
+        ],
+        "endpoint": "https://ndla.no/oembed"
+    },
+    {
+        "name": "Everviz",
+        "templates": [
+            "app.everviz.com/show/([a-zA-Z0-9_\\-]+)",
+            "app.everviz.com/embed/([a-zA-Z0-9_\\-]+)"
+        ],
+        "endpoint": "https://api.everviz.com/oembed",
+        "url": "https://app.everviz.com/embed/{1}/"
+    },
+    {
+        "name": "Adilo",
+        "templates": [
+            "adilo.bigcommand.com/watch/*",
+            "adilo.bigcommand.com/video/*"            
+        ],
+        "endpoint": "https://adilo.bigcommand.com/web/oembed"
+    },
+    {
+        "name": "Quizizz",
+        "templates": [
+            "quizizz.com/admin/quiz/([a-z0-9]+)/"
+        ],
+        "endpoint": "https://quizizz.com/oembed",
+        "url": "https://quizizz.com/embed/quiz/{1}"
     }
 ]

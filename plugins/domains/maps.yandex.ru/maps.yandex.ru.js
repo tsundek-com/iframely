@@ -5,10 +5,10 @@ export default {
     re: /^https:\/\/yandex\.ru\/maps\//,
 
     mixins: [
-        "*"
+        // "*" // Captcha :\
     ],
 
-    getLink: function(url) {
+    getLink: function(url, utils, options) {
         var urlObj = URL.parse(url, true);
 
         var ll = urlObj.query.ll;
@@ -34,15 +34,17 @@ export default {
 
         var aspect_ratio = 4/3;
 
+        const layout = options.getRequestOptions(utils.getProviderName(url) + '.layout', 'landscape');
+
         return {
             template_context: {
                 latitude: latitude,
                 longitude: longitude,
                 zoom: zoom,
-                aspect_ratio: aspect_ratio
+                aspect_ratio: layout === 'landscape' ? aspect_ratio : (layout === 'square' ? 1 : 1 / aspect_ratio)
             },
             type: CONFIG.T.text_html,
-            rel: [CONFIG.R.app, CONFIG.R.html5, CONFIG.R.ssl],
+            rel: [CONFIG.R.app, CONFIG.R.map, CONFIG.R.ssl],
             "aspect-ratio": aspect_ratio
         };
     },

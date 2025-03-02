@@ -5,7 +5,7 @@ export default {
     re: [
         /^https?:\/\/(?:www\.|go\.)?twitch\.tv\/[a-zA-Z0-9_]+\/v\/(\d+)/i,
         /^https?:\/\/(?:www\.|go\.)?twitch\.tv\/(?:[a-zA-Z0-9_]+\/)?videos?\/(\d+)/i,
-        /^https?:\/\/(?:www\.|go\.)?twitch\.tv\/([a-zA-Z0-9_]+)(?:\?parent=.*)?$/i,
+        /^https?:\/\/(?:www\.|go\.)?twitch\.tv\/([a-zA-Z0-9_]+)(?:\?_?parent=.*)?$/i,
         /^https?:\/\/clips.twitch\.tv\/([^\?\/]+)(?:\?[^\?]+)?$/i,
         /^https?:\/\/www\.twitch\.tv\/\w+\/clip\/([^\?\/]+)/i        
     ],
@@ -56,7 +56,7 @@ export default {
             return {
                 href: embedURL,
                 type: CONFIG.T.text_html,
-                rel: [CONFIG.R.player, CONFIG.R.html5],
+                rel: CONFIG.R.player,
                 'aspect-ratio': 16/9,
                 autoplay: 'autoplay=true',
                 message: message,
@@ -88,7 +88,8 @@ export default {
     },
 
     tests: [{
-        noFeeds: true
+        noFeeds: true,
+        skipMethods: ['getMeta']
     },
         "https://www.twitch.tv/videos/743604531?parent=localhost"
     ]

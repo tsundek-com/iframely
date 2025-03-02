@@ -1,8 +1,5 @@
 // use this mixin for domain plugins where you do not want to pull out htmlparser but do need an icon or logo
-import { cache } from '../../lib/cache.js';
 import * as async from 'async';
-import * as _ from 'underscore';
-import log from '../../logging.js';
 
 export default {
 
@@ -12,7 +9,7 @@ export default {
         return domain_icons;
     },
 
-    getData: function(url, iframelyRun, options, cb) {
+    getData: function(url, iframelyRun, cache, log, options, cb) {
 
         // find domain and protocol
         var domain, protocol;
@@ -34,7 +31,7 @@ export default {
         }
 
         const FALLBACK_ICONS = [{
-            href: CONFIG.FALLBACK_ICONS && CONFIG.FALLBACK_ICONS[domain] || `${domainUri}/favicon.ico`,
+            href: CONFIG.FALLBACK_ICONS && CONFIG.FALLBACK_ICONS[domain.replace('www.', '')] || `${domainUri}/favicon.ico`,
             type: CONFIG.T.image,
             rel: [CONFIG.R.icon, CONFIG.R.iframely] // It will be validated as image.
         }];
@@ -72,7 +69,10 @@ export default {
                     // + run icons validation right away
 
                     // forceSyncCheck - ask 'checkFavicon' to check favicon this time before callback.
-                    iframelyRun(domainUri, _.extend({}, options, {forceSyncCheck: true}), function(error, data) {
+                    var options2 = Object.assign({}, options, {forceSyncCheck: true});
+                    delete options2._usedProviderOptions;
+
+                    iframelyRun(domainUri, options2, function(error, data) {
 
                         var icons;
 

@@ -1,8 +1,6 @@
-import spotify_com from './spotify.com.js';
-
 export default {
 
-    re: spotify_com.re,
+    re: 'spotify.com',
 
     provides: ['meta'],
 
@@ -11,7 +9,7 @@ export default {
             && /\/playlist\//.test(url)
             && options.getProviderOptions('spotify.ignore_errors', true)
 
-            || [500, 503, 502, 406].includes(__statusCode)
+            || [500, 503, 502, 406, 403].includes(__statusCode)
             ) {
 
             return cb(null, {

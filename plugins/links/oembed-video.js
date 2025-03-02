@@ -57,21 +57,21 @@ export default {
             player.autoplay = whitelistRecord.oembed['video-autoplay'];
         }
 
-        if (whitelistRecord.isAllowed('oembed.video', 'html5')) {
-            player.rel.push(CONFIG.R.html5);
+        if (iframe && iframe.allow) {
+            player.rel = player.rel.concat(iframe.allow.replace(/autoplay;?\s?\*?/ig, '').split(/\s?\*?(?:;|,)\s?\*?/g));
         }
 
-        if (iframe && iframe.allow) {
-            player.rel = player.rel.concat(iframe.allow.replace(/autoplay;?\s?\*?/ig, '').split(/\s?\*?;\s?\*?/g));
-        }        
+        if (player.href && whitelistRecord.isAllowed('oembed.video', "accept") && player.type === CONFIG.T.text_html) {
+            player.accept = player.type;
+            delete player.type;
+        }
 
         return player;
 
     },
 
     getMeta: function(oembed, whitelistRecord) {
-
-        if (!whitelistRecord.isAllowed('oembed.video') && (oembed.type === "video" || oembed.type === "audio")) {
+        if (whitelistRecord.isAllowed('oembed.video') && (oembed.type === "video" || oembed.type === "audio")) {
             return {
                 medium: oembed.type
             };

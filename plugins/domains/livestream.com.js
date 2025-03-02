@@ -31,7 +31,7 @@ export default {
             return {
                 href: "https://livestream.com/accounts/" + account_id + "/events/" + event_id + video_id + "/player?autoPlay=false",
                 accept: CONFIG.T.text_html,
-                rel: [CONFIG.R.player, CONFIG.R.html5],
+                rel: CONFIG.R.player,
                 "aspect-ratio": 16/9,
                 autoplay: "autoPlay=true"
             }
@@ -40,9 +40,10 @@ export default {
     },    
 
     tests: [
-        "https://livestream.com/accounts/242049/events/1978582",
+        "https://livestream.com/accounts/11707815/events/4299357",
         "https://livestream.com/ironman/events/7777204/videos/163920520",
-        "https://livestream.com/accounts/1862284/ChannelersOfChange/videos/161518819?t=1503250404953",
-        "https://livestream.com/accounts/1862284/ChannelersOfChange"
+        "https://livestream.com/accounts/18968940/events/6670218/videos/145352362",
+        "https://livestream.com/accounts/26021522/events/8730585/videos/214364915",
+        "https://livestream.com/accounts/771055/live/videos/253665646"
     ]
 };

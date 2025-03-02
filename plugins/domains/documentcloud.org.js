@@ -1,6 +1,6 @@
 export default {
 
-    re: /^https?:\/\/(?:www)?\.?documentcloud\.org\/documents?\/\d+/i,
+    re: /^https?:\/\/(?:www|embed)?\.?documentcloud\.org\/documents?\/\d+/i,
 
     mixins: [
         "domain-icon",
@@ -9,7 +9,8 @@ export default {
         "author",
         "og-title",
         "og-image",
-        "og-description"
+        "og-description",
+        "oembed-title"
     ],
 
     // plugin is required to add aspect-ratio and with this fix embeds when used inside iFrame
@@ -25,16 +26,17 @@ export default {
             
             var link = {
                 type: CONFIG.T.text_html,
-                rel: [CONFIG.R.reader, CONFIG.R.html5, CONFIG.R.ssl],
+                rel: [CONFIG.R.reader, CONFIG.R.ssl],
                 'aspect-ratio': aspect
             };
 
             if (!/DC\-note/.test(html) && !/DC\-embed(?:\-page)?/.test(html)) {
                 var page = options.getRequestOptions('documentcloud.page', '1');
+                var title = !!options.getRequestOptions('documentcloud.title', false);
 
                 try {
                     var iframe = oembed.getIframe();
-                    var href = iframe.src;
+                    var href = title ? iframe.replaceQuerystring({ title: 1 }) : iframe.src;
 
                     if (page && page !== '1') {
                         if (href) {
@@ -51,6 +53,10 @@ export default {
                         page: {
                             label: CONFIG.L.page,
                             value: parseInt (page)
+                        },
+                        title: {
+                            label: 'Show title',
+                            value: title
                         }
                     }
                 } catch (ex) {}
@@ -81,7 +87,7 @@ export default {
         return cb(null, {
             oembedLinks: ['json', 'xml'].map(function (format) {
                 return {
-                    href: `https://www.documentcloud.org/api/oembed.${format}?url=${uri}`,
+                    href: `https://api.www.documentcloud.org/api/oembed.${format}?url=${encodeURIComponent(uri)}`,
                     rel: 'alternate',
                     type: `application/${format}+oembed`
                 }
@@ -91,11 +97,13 @@ export default {
 
     tests: [{skipMethods: ['getData']},
         {skipMixins: [
+            'domain-icon',
             'og-description',
             'author',
             'canonical',
             'og-title',
-            'og-image'
+            'og-image',
+            'oembed-title'
         ]},
         'https://www.documentcloud.org/documents/73991-day-three-documents',
         'https://www.documentcloud.org/documents/5766398-ASRS-Reports-for-737-max8.html#document/p2/a486265',
@@ -103,6 +111,7 @@ export default {
         // 'https://www.documentcloud.org/documents/5766398-ASRS-Reports-for-737-max8/pages/2.html',
         'https://www.documentcloud.org/documents/7203159-Joaqu%C3%ADn-El-Chapo-Guzm%C3%A1n-Appeal.html',
         'https://www.documentcloud.org/documents/7203159-Joaqu%C3%ADn-El-Chapo-Guzm%C3%A1n-Appeal',
+        'https://embed.documentcloud.org/documents/7203159-Joaqu%C3%ADn-El-Chapo-Guzm%C3%A1n-Appeal/?embed=1',
         // 'https://www.documentcloud.org/documents/7203159-Joaqu%C3%ADn-El-Chapo-Guzm%C3%A1n-Appeal/pages/2.html',
         "https://www.documentcloud.org/documents/20059068-the-mueller-report#document/p17/a2001254",
         "https://www.documentcloud.org/documents/20059068-the-mueller-report",

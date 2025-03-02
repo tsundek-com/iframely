@@ -1,6 +1,3 @@
-import facebook_post from './facebook.post.js';
-import facebook_video from './facebook.video.js';
-
 export default {
 
     provides: "__allowFBThumbnail",
@@ -10,23 +7,39 @@ export default {
     // then we grab meta and get og:image from there if it's not "security checked" for rate limits.
     // Similar to what we do in domain-icon: ignore if failed.
 
-    re: [].concat(facebook_post.re, facebook_video.re),
+    re: [
+        'facebook.post',
+        'facebook.video'
+    ],
 
     getLink: function(url, __allowFBThumbnail, options, meta) {
 
-        var thumbnail = meta.twitter && meta.twitter.image
-                        || meta.og && meta.og.image
-                        || meta.ld && meta.ld.socialmediaposting.image && meta.ld.socialmediaposting.image.contenturl;
+        var thumbnail = meta.twitter?.image
+                        || meta.og?.image
+                        || meta.ld?.socialmediaposting?.image?.contenturl
+                        || meta.ld?.socialmediaposting?.image && Array.isArray(meta.ld.socialmediaposting.image) // This one is for photos
+                            && meta.ld.socialmediaposting.image.length === 1 && meta.ld.socialmediaposting.image[0].contenturl; 
+
+        if (thumbnail?.url || thumbnail?.src) {
+            thumbnail = thumbnail.url || thumbnail.src;
+        }
 
         if (meta['html-title'] && !/security check required/i.test(meta['html-title']) && thumbnail
-            // && try skip profile pictures for posts
-            && (options.getRequestOptions('facebook.thumbnail') === 'any' //x Explicitely allowed for an account.
-                || meta.og && meta.og.video  // videos
-                || meta.ld && meta.ld.socialmediaposting && meta.ld.socialmediaposting.image  // images
-                || meta.ld && meta.ld.socialmediaposting && meta.ld.socialmediaposting.sharedcontent
-                || /\.png\?/.test(thumbnail) // profile pictures are jpegs
-                || /safe_image\.php\?/.test(thumbnail) // URL cards
-                )) {
+            /** Check for profile pictures is no longer required - 
+             * FB does not give them for posts without a picture as of Jan 8, 2024
+             *        
+             * // && try skip profile pictures for posts
+             * && (options.getProviderOptions('facebook.thumbnail') === 'any' //x Explicitely allowed for an account.
+             *   || meta.og?.video
+             *   || meta.twitter?.player  // videos
+             *   || meta.ld?.socialmediaposting?.image  // images
+             *   || meta.ld?.socialmediaposting?.sharedcontent
+             *   || /\.png\?/.test(thumbnail) // profile pictures are jpegs
+             *   || /safe_image\.php\?/.test(thumbnail) // URL cards
+             *   || /\?url=/.test(thumbnail) // URL cards
+             *   )
+             */
+            ) {
 
             return {
                 href: thumbnail,
@@ -39,12 +52,19 @@ export default {
     },
 
 
-    getData: function(oembed, options) {
+    getData: function(oembed, url, options) {
         
         if (oembed.html && /class=\"fb\-(post|video)\"/i.test(oembed.html) 
             && options.getProviderOptions('facebook.thumbnail', true) && !/comment_id=/.test(oembed.html)) {
 
-            options.followHTTPRedirect = true; // avoid security re-directs of URLs if any
+            // Avoid security re-directs of URLs if any,
+            // but fix canonical URLs for /share urls that now redirect to story.php
+            if (!/facebook\.com\/(permalink|story)\.php\?/i.test(url)) {
+                options.followHTTPRedirect = true; 
+            }
+
+            options.exposeStatusCode = true;
+            options.provider = 'Facebook';
 
             return {
                 __allowFBThumbnail: true
@@ -54,6 +74,6 @@ export default {
 
     tests: [{
         noFeeds: true,
-        skipMethods: ['getData', 'getLink']
+        skipMethods: ['getData', 'getLink'],
     }]
 };

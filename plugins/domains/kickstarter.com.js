@@ -1,5 +1,3 @@
-import * as utils from '../../lib/utils.js';
-
 export default {
 
     re: [
@@ -26,7 +24,7 @@ export default {
         }
     },
 
-    getLinks: function (meta, oembed, options, cb) {
+    getLinks: function (meta, oembed, utils, options, cb) {
 
         // When there is no project video, Kikstarter's oEmbed contains a summary card. 
         // Yet both go as oembed type "rich".
@@ -68,7 +66,7 @@ export default {
                     links.push({
                         href: iframe.src,
                         type: CONFIG.T.text_html,
-                        rel: [CONFIG.R.player, CONFIG.R.oembed, CONFIG.R.html5],
+                        rel: [CONFIG.R.player, CONFIG.R.oembed],
                         "aspect-ratio": aspect
                     });
 
@@ -82,7 +80,7 @@ export default {
                 return cb(null, [{
                     href: iframe.src,
                     type: CONFIG.T.text_html,
-                    rel: [CONFIG.R.app, CONFIG.R.oembed, CONFIG.R.html5],
+                    rel: [CONFIG.R.app, CONFIG.R.oembed],
                     width: oembed.width,
                     height: oembed.height,
                     scrolling: 'no'
@@ -116,10 +114,12 @@ export default {
         noFeeds: true,
         skipMethods: ["getData", "getMeta"]
     },
-        "https://www.kickstarter.com/projects/1104350651/taktik-premium-protection-system-for-the-iphone",
-        "https://www.kickstarter.com/projects/1578116861/toejam-and-earl-back-in-the-groove",
-        "https://www.kickstarter.com/projects/sparkdevices/spark-electron-cellular-dev-kit-with-a-simple-data",
-        "https://www.kickstarter.com/projects/sparkdevices/spark-electron-cellular-dev-kit-with-a-simple-data/widget/video.html",
-        "https://www.kickstarter.com/projects/1818505613/codeybot-new-robot-who-teaches-coding?ref=home_potd"
+        /** Test suite is now blocked by Kickstarter
+         * "https://www.kickstarter.com/projects/1104350651/taktik-premium-protection-system-for-the-iphone",
+         * "https://www.kickstarter.com/projects/1578116861/toejam-and-earl-back-in-the-groove",
+         * "https://www.kickstarter.com/projects/sparkdevices/spark-electron-cellular-dev-kit-with-a-simple-data",
+         * "https://www.kickstarter.com/projects/sparkdevices/spark-electron-cellular-dev-kit-with-a-simple-data/widget/video.html",
+         * "https://www.kickstarter.com/projects/1818505613/codeybot-new-robot-who-teaches-coding?ref=home_potd"
+         */
     ]
 };

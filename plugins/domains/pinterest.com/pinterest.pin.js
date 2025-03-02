@@ -8,19 +8,16 @@ export default {
     ],
 
     // https://developers.pinterest.com/tools/widget-builder/?type=pin&terse=true&size=large
-    getLink: function(urlMatch, meta, iframe, options) {
+    getLink: function(urlMatch, iframe, options) {
 
-        var og = meta.og;
-
-        if (/pin/.test(og.type) || // this check sometimes when Pinterest misses cache hits: og.type is 'website' in those cases
-            (meta.twitter && meta.twitter.app && meta.twitter.app.url && /\/pin\//i.test(meta.twitter.app.url.iphone))) {
+        if (iframe.query?.id) {
 
             // https://developers.pinterest.com/tools/widget-builder/?type=pin
             var hide_description = options.getRequestOptions('pinterest.hide_description', false);
 
             return {
                 type: CONFIG.T.text_html,
-                rel: [CONFIG.R.app, CONFIG.R.ssl, CONFIG.R.inline, CONFIG.R.html5],
+                rel: [CONFIG.R.app, CONFIG.R.ssl, CONFIG.R.inline],
                 template: "pinterest.widget",
                 template_context: {
                     url: `${urlMatch[1]}/pin/${urlMatch[2]}`,
@@ -40,7 +37,7 @@ export default {
                     }
                 },
                 */
-                'aspect-ratio': iframe.width && iframe.height > 96 ? iframe.width / (iframe.height - 96): 1/1,
+                'aspect-ratio': iframe.width && iframe.height ? iframe.width / iframe.height: 1/1,
                 'padding-bottom': 96,
                 'max-width': 600
             };

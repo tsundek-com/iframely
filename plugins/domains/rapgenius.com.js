@@ -21,11 +21,11 @@ export default {
             var theme = options.getRequestOptions('players.theme', 'light');
 
             return {
-                html: '<div id="rg_embed_link_' + id + '" class="rg_embed_link" data-song-id="' + id + '"></div><script src="//genius.com/songs/' + id + '/embed.js' + 
+                html: '<div id="rg_embed_link_' + id + '" class="rg_embed_link" data-song-id="' + id + '"></div><script src="https://genius.com/songs/' + id + '/embed.js' + 
                 (theme === 'dark' ? '?dark=1' : '') +'"></script>',
 
                 type: CONFIG.T.text_html,
-                rel: [CONFIG.R.reader, CONFIG.R.html5, CONFIG.R.ssl],
+                rel: [CONFIG.R.reader, CONFIG.R.ssl],
                 options: {
                     theme: {
                         label: CONFIG.L.theme,
@@ -40,8 +40,9 @@ export default {
         }
     },
 
-    tests: [{ skipMixins: ["favicon"]},
+    tests: [
         "https://genius.com/Bruce-springsteen-4th-of-july-asbury-park-sandy-lyrics",
-        "https://genius.com/Beyonce-flawless-remix-lyrics"
+        "https://genius.com/Beyonce-flawless-remix-lyrics",
+        "https://genius.com/Mariah-carey-all-i-want-for-christmas-is-you-lyrics"
     ]
 };

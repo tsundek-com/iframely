@@ -1,14 +1,12 @@
-import instagram_com from './instagram.com.js';
-
 export default {
 
-    re: instagram_com.re,
+    re: 'instagram.com',
 
     provides: 'ipOG',
 
     getData: function(url, __statusCode, options, cb) {
 
-        return __statusCode !== 429
+        return __statusCode !== 429 && __statusCode !== 403 &&__statusCode !== 508
 
             ? cb({
                 responseStatusCode: __statusCode,

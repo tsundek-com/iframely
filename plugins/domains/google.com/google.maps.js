@@ -48,12 +48,9 @@ export default {
         "*",
     ],
 
-    getMeta: function(gmap) {
-        if (!/^place_id:/.test(gmap.q)) {
-            return {
-                title: (gmap.q && decodeURIComponent(gmap.q).replace (/\+/g, ' ').replace (/%20/g, ' ')) || gmap.center || "Google Maps",
-                site: "Google Maps"
-            }
+    getMeta: function() {
+        return {
+            site: "Google Maps"
         }
     },
 
@@ -112,7 +109,7 @@ export default {
         var links = [{
             href: map,
             type: CONFIG.T.text_html,
-            rel: [CONFIG.R.app, CONFIG.R.ssl, CONFIG.R.html5],
+            rel: CONFIG.R.app,
             "aspect-ratio": eval(gmap.aspect.replace('x', '/')),
             options: {
                 zoom: {
@@ -149,7 +146,7 @@ export default {
 
         if (!options.getProviderOptions('google.maps_key')) {
             return cb ({
-                responseStatusCode: 415,
+                // responseStatusCode: 415, // No error, fall back to generic parsers instead
                 message: "Google requires your own key for Maps Embeds API. <a href='https://developers.google.com/maps/documentation/embed/get-api-key' target='_blank'>Get one</a> and add it to the provider options."
             });
         }

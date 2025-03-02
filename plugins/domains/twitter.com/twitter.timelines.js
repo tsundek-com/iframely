@@ -3,8 +3,8 @@ export default {
     // Embedded Like, Collection, and Moment Timelines are now retired.
     // https://twittercommunity.com/t/removing-support-for-embedded-like-collection-and-moment-timelines/150313
     re: [
-        /^https?:\/\/twitter\.com\/(\w+)\/lists?\/(\d+)/i,
-        /^https?:\/\/twitter\.com\/(\w+)(?:\/likes)?\/?(?:\?.*)?$/i,
+        /^https?:\/\/(?:twitter|x)\.com\/(\w+)\/lists?\/(\d+)/i,
+        /^https?:\/\/(?:twitter|x)\.com\/(\w+)\/?(?:\?.*)?$/i,
     ],
 
     mixins: [
@@ -24,7 +24,16 @@ export default {
 
     getLink: function(url, oembed, twitter_og, options) {
 
-        var html = oembed.html;
+        var html = oembed.html;     
+
+        var locale = options.getProviderOptions('locale');
+        var locale_RE = /^\w{2,3}(?:(?:\_|\-)\w{2,3})?$/i;
+        if (locale && locale_RE.test(locale)) {
+            if (!/^zh\-/i.test(locale)) {
+                locale = locale.replace(/\-.+$/i, '');
+            }
+            html = html.replace(/<a class="twitter\-timeline"( data\-lang="\w+(?:(?:\_|\-)\w+)?")?/, '<a class="twitter-timeline" data-lang="' + locale + '"');
+        }
 
         var width = options.getRequestOptions('twitter.maxwidth',
             (/data\-width=\"(\d+)\"/i.test(html) && html.match(/data\-width=\"(\d+)\"/i)[1])
@@ -85,7 +94,7 @@ export default {
 
         var links = [{
             html: html,
-            rel: [CONFIG.R.reader, CONFIG.R.html5, CONFIG.R.ssl, CONFIG.R.inline],
+            rel: [CONFIG.R.reader, CONFIG.R.ssl, CONFIG.R.inline],
             type: CONFIG.T.text_html,
             options: {
                 limit: {
@@ -136,10 +145,8 @@ export default {
 
     tests: [
         "https://twitter.com/potus",
-        "https://twitter.com/TwitterDev/",
-        // "https://twitter.com/TwitterDev/lists/national-parks",
+        "https://twitter.com/XDevelopers",
         "https://twitter.com/i/lists/211796334",
-        "https://twitter.com/elonmusk/likes",
         {skipMixins: ["domain-icon", "oembed-error"]}, {skipMethods: ["getData"]}
     ]
 };

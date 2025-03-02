@@ -1,37 +1,32 @@
 import { decodeHTML5 } from 'entities';
-import * as utils from '../../../lib/utils.js';
 
 export default {
 
     provides: 'schemaVideoObject',
 
-    getData: function(cheerio, decode, __allowEmbedURL) {
+    getData: function(url, cheerio, decode, __allowEmbedURL, utils) {
 
         /* Let's try to find ld+json in the body first. */
-        var $script = cheerio('script[type="application/ld+json"]:contains("VideoObject")').first(); // embedURL can be embedurl, embedUrl, etc.
+        const ldSelector = 'script[type="application/ld+json"]:contains("VideoObject"), script[type="application/ld&#x2B;json"]:contains("VideoObject")'
+        var $script = cheerio(ldSelector).first(); // embedURL can be embedurl, embedUrl, etc.\
 
         if ($script.length === 1) {
             try {
-                var json = utils.parseJSONSource($script.html());
+                var ld = utils.parseLDSource($script.html(), decode, url);
 
-                if (json['@type']) {
-                    var ld = {};
-                    ld[json['@type'].toLowerCase()] = json;
-
-                    if (__allowEmbedURL !== 'skip_ld') {
-                        return {
-                            ld: ld
-                        }
-                    } else if (ld.videoobject || ld.mediaobject) {
-                        var videoObject = ld.videoobject || ld.mediaobject,
-                            href = videoObject.embedURL || videoObject.embedUrl || videoObject.embedurl;
-
-                        if (href) {
-                            return {
-                                schemaVideoObject: ld.videoobject || ld.mediaobject
-                            }
-                        } // else check microformats, ex.: cbssports
+                if (ld && __allowEmbedURL !== 'skip_ld') {
+                    return {
+                        ld: ld
                     }
+                } else if (ld && (ld.videoobject || ld.mediaobject)) {
+                    const videoObject = ld.videoobject || ld.mediaobject,
+                        href = videoObject.embedURL || videoObject.embedUrl || videoObject.embedurl || videoObject.contentURL || videoobject.contentUrl || videoobject.contenturl;
+
+                    if (href) {
+                        return {
+                            schemaVideoObject: ld.videoobject || ld.mediaobject
+                        }
+                    } // else check microformats, ex.: cbssports
                 }
 
             } catch (ex) {
@@ -102,9 +97,6 @@ export default {
                 accept: whitelistRecord.isDefault ? ['video/*', CONFIG.T.stream_apple_mpegurl, CONFIG.T.stream_x_mpegurl] : [CONFIG.T.text_html, 'video/*', CONFIG.T.stream_apple_mpegurl, CONFIG.T.stream_x_mpegurl]
             };
 
-            if (whitelistRecord.isAllowed('html-meta.embedURL', CONFIG.R.html5)) {
-                player.rel.push(CONFIG.R.html5);
-            }
             if (whitelistRecord.isAllowed('html-meta.embedURL', CONFIG.R.autoplay)) {
                 player.rel.push(CONFIG.R.autoplay);
             }
@@ -122,9 +114,14 @@ export default {
 
         var contentURL = schemaVideoObject.contentURL || schemaVideoObject.contentUrl || schemaVideoObject.contenturl;
         if (contentURL) {
+            var accept = ['video/*', CONFIG.T.stream_apple_mpegurl, CONFIG.T.stream_x_mpegurl];
+            if (whitelistRecord.isAllowed('html-meta.embedURL', 'accept')) {
+                accept.push(CONFIG.T.text_html);
+            }
+            
             links.push({
                 href: contentURL,
-                accept: ['video/*', CONFIG.T.stream_apple_mpegurl, CONFIG.T.stream_x_mpegurl], // detects and validates mime type
+                accept: accept, // detects and validates mime type
                 rel: CONFIG.R.player, // HTML5 will come from mp4, if that's the case
                 'aspect-ratio': schemaVideoObject.height ? schemaVideoObject.width / schemaVideoObject.height : CONFIG.DEFAULT_ASPECT_RATIO
             });

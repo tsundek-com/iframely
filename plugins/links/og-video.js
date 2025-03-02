@@ -1,4 +1,3 @@
-import * as _ from "underscore";
 import utils from './utils.js';
 
 function getVideoLinks(video, whitelistRecord) {
@@ -7,15 +6,13 @@ function getVideoLinks(video, whitelistRecord) {
     var height = whitelistRecord.isAllowed('og.video', 'rotate') ?  video.width : video.height;
     var accept = ['video/*', 'audio/*', CONFIG.T.stream_apple_mpegurl, CONFIG.T.stream_x_mpegurl];
 
-    if (whitelistRecord.isAllowed('og.video', 'html5')) {
-        accept.push (CONFIG.T.text_html);
-    } else if (!whitelistRecord.isDefault) {
-        accept.push (CONFIG.T.text_html);
+    if (!whitelistRecord.isDefault) {
+        accept.push(CONFIG.T.text_html);
     }
 
     var players = [];
 
-    if (!whitelistRecord.isDefault || /\.(mp4|m4v|m3u8|mp3)/i.test(video.url || video) || /^video\//i.test(video.type)) {
+    if (!whitelistRecord.isDefault || /\.?(mp4|m4v|m3u8|mp3)/i.test(video.url || video) || /^video\//i.test(video.type)) {
         players.push({
             href: video.url || video,
             accept: accept,
@@ -59,12 +56,13 @@ export default {
 
             if (og.video instanceof Array) {
 
-                return utils.mergeMediaSize(_.flatten(og.video.map(function(video) {
-                    return getVideoLinks(video, whitelistRecord);
-                })));
+                return utils.mergeMediaSize(
+                    og.video.map(function(video) {
+                        return getVideoLinks(video, whitelistRecord);
+                    }).flat()
+                );
 
             } else if (og.video) {
-
                 return getVideoLinks(og.video, whitelistRecord);
             }
         }

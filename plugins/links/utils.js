@@ -1,5 +1,3 @@
-import * as _ from 'underscore';
-
 export default {
 
     notPlugin: true,
@@ -47,7 +45,7 @@ export default {
                     }
 
                     if (!hasMedia) {
-                        _.extend(link, media);
+                        Object.assign(link, media);
                     }
 
                     i++;
@@ -80,16 +78,37 @@ export default {
         }
     },
 
-    parseMetaLinks: function(key, value, whitelistRecord) {
+    parseMetaLinks: function(key, value, whitelistRecord, appname) {
 
         if (typeof value !== "object" || typeof value === "string") {
             return [];
         }
 
-        var rels = key.split(/\W+/);
+        var rels = key.split(/[^\w-]+/);
+        // Unique values.
+        rels = [...new Set(rels)];
+        // Filter empty.
+        rels = rels.filter(i => i);
 
+        var isAllowed = whitelistRecord.isAllowed('html-meta.iframely') // New check.
+                        || whitelistRecord.isAllowed('iframely.app');   // Old check
+
+        // If no additional rels specified, try add 'app'.
         if (!rels.some(rel => CONFIG.REL_GROUPS && CONFIG.REL_GROUPS.includes(rel))) {
-            return [];
+            if (isAllowed
+                && /iframely/i.test(key)
+                || (appname && key.indexOf(appname) === 0)) {
+                // Allow <link rel="iframely" ....
+                // With default rel of "app"
+                rels.push(CONFIG.R.app);
+            } else {
+                return [];
+            }
+        }
+
+        if (!/iframely/i.test(key) && appname && key.indexOf(appname) === 0) {
+            // Allow url = canonical and other validations
+            rels.push(CONFIG.R.iframely);
         }
 
         if (!(value instanceof Array)) {
@@ -99,14 +118,22 @@ export default {
         var ALLOWED_TYPES = Object.values(CONFIG.T);
 
         value = value.filter(
-            v => v.type && ALLOWED_TYPES.indexOf(v.type) > -1
+            // Allow empty value for `text/html`.
+            v => !v.type || v.type && ALLOWED_TYPES.indexOf(v.type) > -1
         );
 
         // Apply whitelist except for thumbnails.
         if (rels.indexOf(CONFIG.R.thumbnail) === -1 && rels.indexOf(CONFIG.R.icon) === -1 && rels.indexOf(CONFIG.R.logo) === -1) {
             var tags = whitelistRecord.getQATags(rels);
-            if (tags.indexOf('allow') === -1) {
+            var isAllowedByRels = tags.indexOf('allow') > -1;
+
+            if (!isAllowed && !isAllowedByRels) {
                 return [];
+            }
+
+            // Add resizable rel.
+            if (rels.indexOf(CONFIG.R.resizable) === -1 && whitelistRecord.isAllowed('html-meta.iframely', CONFIG.R.resizable)) {
+                rels.push(CONFIG.R.resizable);
             }
         }
 
@@ -125,10 +152,10 @@ export default {
 
             if (media) {
                 CONFIG.MEDIA_ATTRS.forEach(function(ma) {
-                    var re = "(?:^|[^-])\\b" + ma + "\\s*:\\s*([\\d./:]+)(?:px)?\\b";
+                    var re = "(?:^|[^-])\\b" + ma + "\\s*:\\s*([\\d./:\\s]+)(?:px)?\\b";
                     var m = media.match(re);
                     if (m) {
-                        link[ma] = m[1];
+                        link[ma] = m[1].replace(/\s/g, '');
                     }
                 });
             }

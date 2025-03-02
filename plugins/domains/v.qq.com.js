@@ -16,7 +16,7 @@ export default {
         return {
             href: "https://v.qq.com/txp/iframe/player.html?vid=" + urlMatch[1],
             type: CONFIG.T.text_html,
-            rel: [CONFIG.R.player, CONFIG.R.html5, CONFIG.R.iframely],
+            rel: [CONFIG.R.player, CONFIG.R.iframely],
             'aspect-ratio': 16/9,
             'padding-bottom': 50,
             autoplay: 'autoplay=true'
@@ -24,8 +24,8 @@ export default {
     },
 
     tests: [{
-        page: "http://v.qq.com/index.html",
-        selector: "a.figure",
+        page: "https://v.qq.com/",
+        selector: ".video-banner-item a.poster-pic-container",
         getUrl: function(url) {
             return re.some((r) => r.test(url));
         }

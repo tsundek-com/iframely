@@ -1,5 +1,3 @@
-import * as _ from "underscore";
-
 function getStreamLinks(twitter, stream, whitelistRecord) {
 
     var player = {
@@ -23,6 +21,10 @@ function getStreamLinks(twitter, stream, whitelistRecord) {
         player.rel.push(CONFIG.R.autoplay);
     }
 
+    if (whitelistRecord.isAllowed('twitter.stream', 'accept')) {
+        player.accept.push(CONFIG.T.text_html);
+    }
+
     if (whitelistRecord.isAllowed('twitter.stream', 'gifv')) {
         player.rel.push(CONFIG.R.gifv);
         player.accept = CONFIG.T.video_mp4
@@ -40,13 +42,11 @@ export default {
             var stream = twitter.player.stream;
 
             if (stream instanceof Array) {
-
-                return _.flatten(stream.map(function(s) {
+                return stream.map(function(s) {
                     return getStreamLinks(twitter, s, whitelistRecord);
-                }));
+                }).flat();
 
             } else if (stream) {
-
                 return getStreamLinks(twitter, stream, whitelistRecord);
             }
         }

@@ -23,7 +23,7 @@ export default {
         } else {
 
             var widget = {
-                rel: [CONFIG.R.oembed, CONFIG.R.html5],
+                rel: [CONFIG.R.oembed],
                 type: CONFIG.T.text_html
             };
 
@@ -73,7 +73,7 @@ export default {
                 widget.height = !/&?hide_cover=1/i.test(widget.href) ? 400 : (/&?mini=1/i.test(widget.href) ? 60 : 120);
                 widget.scrolling = "no";
                 widget.rel.push(CONFIG.R.player);
-                widget.rel.push(CONFIG.R.auido);
+                widget.rel.push(CONFIG.R.audio);
 
                 widget.options = {
                     style: {

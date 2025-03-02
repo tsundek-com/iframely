@@ -10,14 +10,26 @@ export default {
 
     getData: function(ld, whitelistRecord, url) {
 
-        var json = ld.videoobject 
-                    || ld.mediaobject 
-                    || (ld.newsarticle && (ld.newsarticle.video || ld.newsarticle.videoobject)) 
-                    || (ld.tvepisode && (ld.tvepisode.video || ld.tvepisode.videoobject))
-                    || (ld.movie && (ld.movie.video || ld.movie.videoobject))
-                    || (ld.tvclip && (ld.tvclip.video || ld.tvclip.videoobject));
+        var json = ld.videoobject || ld.mediaobject;
+
+        /*
+        || (ld.newsarticle && (ld.newsarticle.video || ld.newsarticle.videoobject)) 
+        || (ld.tvepisode && (ld.tvepisode.video || ld.tvepisode.videoobject))
+        || (ld.movie && (ld.movie.video || ld.movie.videoobject))
+        || (ld.tvclip && (ld.tvclip.video || ld.tvclip.videoobject));
+        */
+        if (!json) { // try to find video attached to main object
+            var mainObjWithVideo = ld && Object.values(ld).find((obj) => obj.video || obj.videoobject);
+            if (mainObjWithVideo) {
+                json = mainObjWithVideo.video || mainObjWithVideo.videoobject;
+            }
+        }
 
         if (json) {
+
+            if (Array.isArray(json) && json.length === 1) {
+                json = json[0];
+            }
 
             var video_src = json.embedurl || json.embedUrl || json.embedURL || json.contenturl || json.contentUrl || json.contentURL;
 
@@ -42,7 +54,6 @@ export default {
                     }
                 }
             }
-
 
             var data = {
                 schemaVideoObject: json

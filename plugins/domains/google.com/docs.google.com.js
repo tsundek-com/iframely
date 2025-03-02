@@ -34,7 +34,7 @@ export default {
         if (schemaFileObject.embedURL || schemaFileObject.embedUrl) {
 
             var file = {
-                rel: [CONFIG.R.file, CONFIG.R.html5],
+                rel: [CONFIG.R.file],
                 href: schemaFileObject.embedURL || schemaFileObject.embedUrl,
                 accept: CONFIG.T.text_html
             };
@@ -147,6 +147,11 @@ export default {
                     embedUrl: url
                 }  
             });
+        } else if (/\/pubchart(\?[^\?\/]+)?(?:#.*)?$/i.test(url)) {
+            return cb({
+                responseStatusCode: 415,
+                message: 'Google speadsheet charts are fixed-size and cannot be supported. Try linking yours as an image.'
+            })            
         } else if (!meta.og) {
             return cb({
                 responseStatusCode: 415,
@@ -160,11 +165,9 @@ export default {
     tests: [
         "https://docs.google.com/document/d/17jg1RRL3RI969cLwbKBIcoGDsPwqaEdBxafGNYGwiY4/preview?sle=true",
         "https://docs.google.com/document/d/1KHLQiZkTFvMvBHmYgntEQtNxXswOQISjkbpnRO3jLrk/edit",
-        "https://drive.google.com/file/d/0BwGT3x6igRtkTWNtLWlhV3paZjA/view",
         "https://docs.google.com/spreadsheets/d/10JLM1UniyGNuLaYTfs2fnki-U1iYFsQl4XNHPZTYunw/edit?pli=1#gid=0",
         "https://docs.google.com/spreadsheets/d/e/2PACX-1vRKtFs55r6ow0rVvoGJLlDyqxD_455wR6_eZ42z8izYGT_UM6hNW0ruFhn26m_SzsoT4AQxZZA968Lp/pubhtml?gid=1443541234&single=true&widget=true&headers=false",
         "https://docs.google.com/spreadsheets/u/1/d/1_tsspyfiH8ZVAOmoCbGJ3gvzGU5zLUb-PEG0-RyjP5E/edit#gid=1926296709",
-        "https://docs.google.com/document/d/e/2PACX-1vSeGAfeYcpPAGLX4h0krdMR8HBuCxf3M0H0MlyeQ9GYQzJsJ2KTfZ_iSopp5dUwX3JVOfCpAoEyoXdh/pub",
         "https://drive.google.com/open?id=1rKcaLuY0WzhPqQFCGy_4aIJblnEziy7-",
         "https://docs.google.com/presentation/d/e/2PACX-1vQmrymNWFltfprLl9IX-irRcmvjsL1ahOKAt8YTzuWTdcWyIH2EX6wyUmmJ4ftG3dICaTZ9DCpqXiht/pub?start=false&loop=false&delayms=3000",
         {

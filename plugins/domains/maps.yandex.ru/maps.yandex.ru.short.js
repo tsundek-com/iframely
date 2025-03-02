@@ -3,14 +3,14 @@ export default {
     re: /^https:\/\/yandex\.ru\/maps\/-\//,
 
     mixins: [
-        "*"
+        // "*" //Captcha :\
     ],
 
     getLink: function(url) {
         return {
             href: url.replace(/\/maps\/-\//, '/map-widget/v1/-/'),
             type: CONFIG.T.text_html,
-            rel: [CONFIG.R.app, CONFIG.R.html5],
+            rel: CONFIG.R.app,
             "aspect-ratio": 4/3
         };
     },

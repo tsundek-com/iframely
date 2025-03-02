@@ -1,5 +1,3 @@
-import * as utils from '../../lib/utils.js';
-
 export default {
 
     re: [
@@ -12,11 +10,11 @@ export default {
 
     getMeta: function(og) {
         return {
-            title: og.title && og.title.replace(' : Free Download &amp; Streaming : Internet Archive', '')
+            title: og.title && og.title.replace(/\s?:\s?Free\sDownload.+$/i, '')
         }
     },
 
-    getLink: function(url, twitter, options, cb) {
+    getLink: function(url, twitter, utils, options, cb) {
 
         if (twitter.card === 'player' && twitter.player) {
 
@@ -28,7 +26,7 @@ export default {
                 var player = {
                     href: 'https://archive.org/embed/' + hrefMatch[1],
                     accept: CONFIG.T.text_html,
-                    rel: [CONFIG.R.player, CONFIG.R.html5]
+                    rel: CONFIG.R.player
                 };
 
                 if (/\.(mp3|wma|wav|flac)$/i.test(playerHref)) {
@@ -69,9 +67,7 @@ export default {
                 utils.getImageMetadata(img, options, function(error, data) {
 
                     if (error || data.error || !(data.width && data.height)) {
-
                         return cb('Error getting Archive.org image:' +  (error || data.error));
-
                     }
 
                     links.push({
@@ -82,16 +78,24 @@ export default {
                         height: data.height
                     });
 
-                    if (!isPhoto) {
-                        var aspect = 2 * data.width / data.height;
+                    if (urlMatch) {
+                        if (isPhoto) {
+                            links.push({
+                                href: `https://archive.org/embed/${urlMatch[1]}`,
+                                type: CONFIG.T.text_html,
+                                rel: CONFIG.R.image,
+                                "aspect-ratio": data.width / data.height,
+                            });
 
-                        links.push({
-                            href: 'https://archive.org/stream/' + urlMatch[1] + '?ui=embed',
-                            type: CONFIG.T.text_html,
-                            rel: [CONFIG.R.reader, CONFIG.R.html5],
-                            "aspect-ratio": aspect,
-                            //"padding-bottom": 40 + 15 // padding no longer needed
-                        });
+                        } else {
+                            links.push({
+                                href: `https://archive.org/stream/${urlMatch[1]}?ui=embed`,
+                                type: CONFIG.T.text_html,
+                                rel: CONFIG.R.reader,
+                                "aspect-ratio": 2 * data.width / data.height,
+                                "padding-bottom": 40 + 15
+                            });
+                        }
                     }
 
                     return cb(null, links);
@@ -104,21 +108,23 @@ export default {
 
     },
 
-    tests: [{
-        page: "https://archive.org/details/audio_tech?&sort=-downloads&page=2",
-        selector: ".item-ttl>a"
-    },
+    tests: [
+        // player
         "https://archive.org/details/Podcast8.23GoethesIronicMephistopheles1700s1800s",
-        "https://archive.org/details/TheInternetArchivistsFinalCutBoostedSound",
         "https://archive.org/details/um2000-09-01.shnf",
+        "https://archive.org/details/MLKDream",
+        "https://archive.org/details/movie-time-jodorowskys-dune-2013",
+
+        "https://archive.org/details/TheInternetArchivistsFinalCutBoostedSound",
         "https://archive.org/details/ChronoTrigger_456",
         "https://archive.org/details/YourFami1948",
-        "https://archive.org/details/MLKDream",
-        "https://archive.org/details/in.ernet.dli.2015.185295",
+        // reader
+        "https://archive.org/details/IbnIshaq-SiratuRasulAllah-translatorA.Guillaume",
         "https://archive.org/details/galaxymagazine-1950-10",
+        "https://archive.org/details/wessextales0000thom_z1o2/page/n9/mode/2up",
+        // image
         "https://archive.org/details/mma_selfportrait_with_a_straw_hat_obverse_the_potato_peeler_436532",
-        "https://archive.org/details/IbnIshaq-SiratuRasulAllah-translatorA.Guillaume"
-        // Native embeds for photos do not work yet:
-        //"https://archive.org/details/mma_selfportrait_with_a_straw_hat_obverse_the_potato_peeler_436532"
+        "https://archive.org/details/propix.SIL08-09434-a",
+        "https://archive.org/details/mma_albert_einstein_270714"
     ]
 };

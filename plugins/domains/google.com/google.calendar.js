@@ -1,16 +1,16 @@
 export default {
 
     re: [
-        /https?:\/\/(?:www|calendar)\.google\.com\/calendar\/embed\/?\?([^\/]+)/i
+        /^https?:\/\/(?:www|calendar)\.google\.com\/calendar\/(?:u\/\d+\/)?embed\/?\?(?:.+)$/i
     ],
 
     mixins: ['*'],
 
-    getLink: function(urlMatch) {
+    getLink: function(url) {
         return {
-            href: 'https://www.google.com/calendar/embed?' + urlMatch[1] + '&via=iframely',
+            href: url.replace(/\/u\/\d+\//, '/'),
             type: CONFIG.T.text_html,
-            rel: [CONFIG.R.reader, CONFIG.R.html5],
+            rel: [CONFIG.R.iframely, CONFIG.R.reader],
             "aspect-ratio": 800 / 600
         }
     },
@@ -18,6 +18,7 @@ export default {
     tests: [{
         noFeeds: true
     },
-        'https://calendar.google.com/calendar/embed?src=92600p5mb857b0t0jq0f6l8vpg%40group.calendar.google.com&ctz=America/Toronto'
+        'https://calendar.google.com/calendar/embed?ctz=America/Toronto&src=92600p5mb857b0t0jq0f6l8vpg%40group.calendar.google.com',
+        'https://calendar.google.com/calendar/u/0/embed?ctz=America/Toronto&src=92600p5mb857b0t0jq0f6l8vpg%40group.calendar.google.com'
     ]
 };    

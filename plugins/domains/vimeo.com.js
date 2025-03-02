@@ -26,8 +26,12 @@ export default {
 
     getLink: function(oembed, options) {
         var iframe = oembed.getIframe();
+        const query = options.getQueryOptions();
 
         var params = querystring.parse(options.getProviderOptions('vimeo.get_params', '').replace(/^\?/, ''));
+        if (query) {
+            params = {...params, ...query};
+        }
 
         if (options.getProviderOptions('players.showinfo', false)) {
             params.title = 1;
@@ -43,13 +47,21 @@ export default {
             texttrack = '';
         }
 
+        // https://developer.vimeo.com/api/oembed/videos
+        var controls = options.getRequestOptions('vimeo.controls', params.controls);
+        if (controls == 0) {
+            params.controls = false;
+        } else if (params.controls) {
+            delete params.controls;
+        }
+
         var links = [];
 
         if (oembed.thumbnail_url || !options.getProviderOptions('vimeo.disable_private', false)) {
             links.push({
                 href: iframe.replaceQuerystring(params),
                 type: CONFIG.T.text_html,
-                rel: [CONFIG.R.player, CONFIG.R.html5],
+                rel: CONFIG.R.player,
                 "aspect-ratio": oembed.width / oembed.height, // ex. portrait https://vimeo.com/216098214
                 autoplay: "autoplay=1",
                 options: {
@@ -81,12 +93,14 @@ export default {
             links.push(thumbnail);
         }
 
-        // Also let's try and add bigger image if needed, but check that it's value.
-        // No need to add everywhere: some thumbnails are ok, like https://vimeo.com/183776089, but some are not - http://vimeo.com/62092214.
-        if (options.getProviderOptions('images.loadSize') !== false && /\-d_\d{2,4}x\d{2,4}(?:\.jpg)?$/.test(oembed.thumbnail_url)) {
+        // Also let's try and add a bigger image.
+        if (/* options.getProviderOptions('images.loadSize') !== false */
+            CONFIG.providerOptions && CONFIG.providerOptions.images
+            && CONFIG.providerOptions.images.loadSize !== false
+            && /\-d_\d{2,4}(?:x\d{2,4})?(?:\.jpg)?$/.test(oembed.thumbnail_url)) {
             links.push({
-                href:oembed.thumbnail_url.replace(/\-d_\d{2,4}x\d{2,4}((?:\.jpg)?)$/, `-d_${oembed.width}$1`),
-                type: CONFIG.T.image,
+                href:oembed.thumbnail_url.replace(/\-d_\d{2,4}(?:x\d{2,4})?((?:\.jpg)?)$/, `-d?f=webp`),
+                type: CONFIG.T.image_webp,
                 rel: CONFIG.R.thumbnail
             });
         }
@@ -96,7 +110,7 @@ export default {
 
 
     tests: [{
-        feed: "http://vimeo.com/channels/staffpicks/videos/rss"
+        feed: "http://vimeo.com/channels/bestofstaffpicks/videos/rss"
     },
         "https://vimeo.com/65836516",
         "https://vimeo.com/141567420",

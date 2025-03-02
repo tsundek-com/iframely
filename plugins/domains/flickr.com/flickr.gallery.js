@@ -31,8 +31,8 @@ export default {
         return {
             html: html
                 .replace(/\@n/g, "@N")
-                .replace(/width=\"\d+\" height=\"\d+\" alt/, 'width="100%" alt'),
-            rel: [CONFIG.R.player, CONFIG.R.slideshow, CONFIG.R.ssl, CONFIG.R.inline, CONFIG.R.html5],
+                .replace(/width=[\'\"]\d+[\'\"] height=[\'\"]\d+[\'\"] alt/, 'width="100%" alt'),                 
+            rel: [CONFIG.R.player, CONFIG.R.slideshow, CONFIG.R.ssl, CONFIG.R.inline],
             type: CONFIG.T.text_html,
             "aspect-ratio": oembed.width / oembed.height,
             options: {
